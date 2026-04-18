@@ -1,0 +1,1821 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UNEC Ehtimal Nəzəriyyəsi Quiz</title>
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-chtml.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --card: #1a1a26;
+    --border: #2a2a3e;
+    --accent: #6c63ff;
+    --accent2: #ff6584;
+    --gold: #f5c842;
+    --correct: #22c55e;
+    --wrong: #ef4444;
+    --text: #e8e8f0;
+    --muted: #7070a0;
+    --radius: 16px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(108,99,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(108,99,255,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .glow-orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .orb1 { width: 400px; height: 400px; background: rgba(108,99,255,0.12); top: -100px; right: -100px; }
+  .orb2 { width: 300px; height: 300px; background: rgba(255,101,132,0.08); bottom: 100px; left: -80px; }
+
+  #app { position: relative; z-index: 1; }
+
+  /* ── INTRO SCREEN ── */
+  #intro {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+  }
+
+  .logo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(108,99,255,0.15);
+    border: 1px solid rgba(108,99,255,0.3);
+    border-radius: 100px;
+    padding: 8px 18px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 32px;
+    animation: fadeDown 0.6s ease both;
+  }
+
+  .intro-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(36px, 6vw, 72px);
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 16px;
+    animation: fadeDown 0.6s 0.1s ease both;
+  }
+
+  .intro-title .highlight {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .intro-sub {
+    color: var(--muted);
+    font-size: 18px;
+    font-weight: 400;
+    max-width: 480px;
+    line-height: 1.6;
+    margin-bottom: 48px;
+    animation: fadeDown 0.6s 0.2s ease both;
+  }
+
+  .stats-row {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 48px;
+    animation: fadeDown 0.6s 0.3s ease both;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .stat-chip {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 24px;
+    text-align: center;
+  }
+
+  .stat-chip .num {
+    font-family: 'DM Mono', monospace;
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--accent);
+    display: block;
+  }
+
+  .stat-chip .label {
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .start-btn {
+    background: linear-gradient(135deg, var(--accent), #8b5cf6);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 18px 48px;
+    font-size: 18px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 8px 32px rgba(108,99,255,0.35);
+    animation: fadeDown 0.6s 0.4s ease both;
+    letter-spacing: 0.5px;
+  }
+
+  .start-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 48px rgba(108,99,255,0.5);
+  }
+
+  /* ── QUIZ SCREEN ── */
+  #quiz { display: none; padding: 20px; max-width: 860px; margin: 0 auto; padding-bottom: 60px; }
+
+  .quiz-header {
+    position: sticky;
+    top: 0;
+    background: rgba(10,10,15,0.92);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 0 14px;
+    margin: 0 -20px;
+    padding: 16px 20px 14px;
+    z-index: 100;
+    margin-bottom: 32px;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .q-counter {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .q-counter span { color: var(--text); font-weight: 600; }
+
+  .timer-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 6px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    font-weight: 500;
+    transition: border-color 0.3s, color 0.3s;
+  }
+
+  .timer-badge.urgent { border-color: var(--accent2); color: var(--accent2); }
+
+  .progress-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 100px;
+    transition: width 0.4s ease;
+  }
+
+  /* Question card */
+  .q-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    margin-bottom: 20px;
+    animation: slideUp 0.4s ease both;
+  }
+
+  .q-number {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  .q-text {
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--text);
+    font-weight: 400;
+  }
+
+  .q-text img { max-width: 100%; border-radius: 8px; margin: 8px 0; }
+
+  /* Math/table rendering */
+  .q-text table {
+    border-collapse: collapse;
+    margin: 12px 0;
+    width: auto;
+    max-width: 100%;
+  }
+
+  .q-text td, .q-text th {
+    border: 1px solid var(--border);
+    padding: 8px 16px;
+    text-align: center;
+    font-size: 15px;
+  }
+
+  .q-text th { background: rgba(108,99,255,0.15); color: var(--accent); }
+
+  /* Options */
+  .options-grid { display: flex; flex-direction: column; gap: 10px; }
+
+  .option-btn {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    text-align: left;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    line-height: 1.5;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: rgba(108,99,255,0.08);
+    transform: translateX(4px);
+  }
+
+  .option-btn .opt-label {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    border-radius: 8px;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.2s;
+    margin-top: 1px;
+  }
+
+  .option-btn.correct {
+    border-color: var(--correct) !important;
+    background: rgba(34,197,94,0.12) !important;
+    animation: correctPop 0.4s ease;
+  }
+
+  .option-btn.correct .opt-label {
+    background: var(--correct);
+    color: white;
+  }
+
+  .option-btn.wrong {
+    border-color: var(--wrong) !important;
+    background: rgba(239,68,68,0.12) !important;
+    animation: wrongShake 0.4s ease;
+  }
+
+  .option-btn.wrong .opt-label {
+    background: var(--wrong);
+    color: white;
+  }
+
+  .option-btn:disabled { cursor: default; }
+
+  .feedback-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
+    border-radius: 10px;
+    margin-top: 12px;
+    font-weight: 500;
+    font-size: 14px;
+    animation: slideUp 0.3s ease;
+  }
+
+  .feedback-row.correct-fb { background: rgba(34,197,94,0.12); color: var(--correct); }
+  .feedback-row.wrong-fb { background: rgba(239,68,68,0.12); color: var(--accent2); }
+
+  .next-btn {
+    background: linear-gradient(135deg, var(--accent), #8b5cf6);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 32px;
+    font-size: 16px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 100%;
+    margin-top: 20px;
+    display: none;
+  }
+
+  .next-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(108,99,255,0.4); }
+
+  /* ── RESULTS SCREEN ── */
+  #results { display: none; padding: 40px 20px; max-width: 860px; margin: 0 auto; }
+
+  .result-hero {
+    text-align: center;
+    margin-bottom: 48px;
+    animation: fadeDown 0.5s ease both;
+  }
+
+  .score-ring {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    margin: 0 auto 32px;
+  }
+
+  .score-ring svg { transform: rotate(-90deg); }
+  .score-ring .track { fill: none; stroke: var(--border); stroke-width: 8; }
+  .score-ring .fill { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 1.5s ease; }
+
+  .score-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .score-pct {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .score-lbl { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+
+  .result-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    margin-bottom: 8px;
+  }
+
+  .result-sub { color: var(--muted); font-size: 16px; }
+
+  .result-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 48px;
+    animation: fadeDown 0.5s 0.15s ease both;
+  }
+
+  .rstat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+  }
+
+  .rstat .rnum {
+    font-family: 'DM Mono', monospace;
+    font-size: 32px;
+    font-weight: 500;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .rstat .rlbl { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+
+  .rstat.correct-stat .rnum { color: var(--correct); }
+  .rstat.wrong-stat .rnum { color: var(--wrong); }
+  .rstat.total-stat .rnum { color: var(--accent); }
+
+  /* Review section */
+  .review-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    animation: fadeDown 0.5s 0.2s ease both;
+  }
+
+  .review-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+  }
+
+  .filter-tabs {
+    display: flex;
+    gap: 8px;
+  }
+
+  .filter-tab {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .filter-tab.active {
+    background: rgba(108,99,255,0.2);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .review-list { display: flex; flex-direction: column; gap: 16px; }
+
+  .review-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    animation: slideUp 0.3s ease both;
+    transition: border-color 0.2s;
+  }
+
+  .review-card.rc-correct { border-left: 3px solid var(--correct); }
+  .review-card.rc-wrong { border-left: 3px solid var(--wrong); }
+
+  .rc-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .rc-badge {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+
+  .rc-badge.correct { background: rgba(34,197,94,0.15); color: var(--correct); }
+  .rc-badge.wrong { background: rgba(239,68,68,0.15); color: var(--wrong); }
+
+  .rc-qnum { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; }
+
+  .rc-question { font-size: 15px; line-height: 1.6; margin-bottom: 16px; color: var(--text); }
+
+  .rc-answers { display: flex; flex-direction: column; gap: 8px; }
+
+  .rc-answer {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .rc-answer.user-correct { background: rgba(34,197,94,0.12); color: var(--correct); }
+  .rc-answer.user-wrong { background: rgba(239,68,68,0.12); color: var(--accent2); text-decoration: line-through; opacity: 0.8; }
+  .rc-answer.show-correct { background: rgba(34,197,94,0.08); color: var(--correct); }
+
+  .rc-icon { font-size: 14px; min-width: 16px; }
+
+  .retry-btn {
+    background: linear-gradient(135deg, var(--accent), #8b5cf6);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 18px 48px;
+    font-size: 18px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 8px 32px rgba(108,99,255,0.35);
+    margin: 40px auto 0;
+    display: block;
+  }
+
+  .retry-btn:hover { transform: translateY(-3px); box-shadow: 0 16px 48px rgba(108,99,255,0.5); }
+
+  /* Math rendering area */
+  .math-container { overflow-x: auto; }
+
+  /* Animations */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes correctPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes wrongShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  @keyframes dashAnim {
+    from { stroke-dashoffset: 534; }
+  }
+
+  /* Table styles in question */
+  .q-table-wrap { overflow-x: auto; margin: 12px 0; }
+  .q-table { border-collapse: collapse; min-width: 300px; }
+  .q-table td, .q-table th {
+    border: 1px solid var(--border);
+    padding: 10px 18px;
+    text-align: center;
+    font-size: 14px;
+    background: var(--surface);
+  }
+  .q-table th { background: rgba(108,99,255,0.2); color: var(--accent); font-weight: 600; }
+  .q-table tr:hover td { background: rgba(108,99,255,0.06); }
+
+  .formula-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin: 10px 0;
+    text-align: center;
+    overflow-x: auto;
+    font-size: 15px;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 600px) {
+    .result-stats { grid-template-columns: 1fr; }
+    .filter-tabs { flex-wrap: wrap; }
+    .q-card { padding: 20px; }
+    .stats-row { gap: 12px; }
+  }
+
+  .hidden { display: none !important; }
+
+  /* ── BOTTOM QUESTION NAVIGATOR ── */
+  .q-nav-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(10,10,15,0.96);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    padding: 10px 16px 14px;
+    z-index: 200;
+    display: none;
+  }
+
+  .q-nav-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+    text-align: center;
+  }
+
+  .q-nav-inner {
+    display: flex;
+    gap: 5px;
+    overflow-x: auto;
+    max-width: 860px;
+    margin: 0 auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+    justify-content: flex-start;
+  }
+  .q-nav-inner::-webkit-scrollbar { display: none; }
+
+  .q-dot {
+    width: 30px; height: 30px; min-width: 30px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .q-dot:hover:not(.current) { border-color: rgba(108,99,255,0.5); color: var(--text); }
+  .q-dot.current { border-color: var(--accent); background: rgba(108,99,255,0.25); color: var(--accent); box-shadow: 0 0 8px rgba(108,99,255,0.3); }
+  .q-dot.ans-correct { border-color: var(--correct); background: rgba(34,197,94,0.15); color: var(--correct); }
+  .q-dot.ans-wrong { border-color: var(--wrong); background: rgba(239,68,68,0.15); color: var(--wrong); }
+  .q-dot.ans-correct.current { box-shadow: 0 0 8px rgba(34,197,94,0.4); }
+  .q-dot.ans-wrong.current { box-shadow: 0 0 8px rgba(239,68,68,0.4); }
+
+  /* Extra bottom padding for the nav bar */
+  #quiz { padding-bottom: 100px; }
+
+  /* Navigation buttons (Prev + Next) */
+  .nav-btns {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .prev-btn {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    border-radius: 12px;
+    padding: 14px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s;
+    white-space: nowrap;
+    display: none;
+  }
+  .prev-btn:hover { border-color: var(--accent); background: rgba(108,99,255,0.1); color: var(--accent); }
+  .prev-btn.visible { display: block; }
+
+  .next-btn { flex: 1; margin-top: 0; }
+</style>
+</head>
+<body>
+<div class="glow-orb orb1"></div>
+<div class="glow-orb orb2"></div>
+
+<div id="app">
+
+<!-- INTRO -->
+<div id="intro">
+  <div class="logo-badge">✦ UNEC · Ehtimal Nəzəriyyəsi</div>
+  <h1 class="intro-title">
+    Biliklərinizi<br><span class="highlight">Sınayın</span>
+  </h1>
+  <p class="intro-sub">Ehtimal nəzəriyyəsi və riyazi statistika üzrə 333 sualdan random 30 sual seçilir. Hər girişdə fərqli sual dəsti!</p>
+  <div class="stats-row">
+    <div class="stat-chip"><span class="num">333</span><span class="label">Ümumi sual</span></div>
+    <div class="stat-chip"><span class="num">30</span><span class="label">Hər testdə</span></div>
+    <div class="stat-chip"><span class="num">30'</span><span class="label">Vaxt limiti</span></div>
+  </div>
+  <button class="start-btn" onclick="startQuiz()">Testi Başlat →</button>
+</div>
+
+<!-- QUIZ -->
+<div id="quiz">
+  <div class="quiz-header">
+    <div class="header-top">
+      <div class="q-counter">Sual <span id="qNum">1</span> / <span id="qTotal">30</span></div>
+      <div class="timer-badge" id="timerBadge">⏱ <span id="timerDisplay">30:00</span></div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+
+  <div class="q-card" id="questionCard">
+    <div class="q-number" id="qLabel">SUAL 1</div>
+    <div class="q-text math-container" id="questionText"></div>
+  </div>
+
+  <div class="options-grid" id="optionsGrid"></div>
+  <div id="feedbackArea"></div>
+  <div class="nav-btns">
+    <button class="prev-btn" id="prevBtn" onclick="prevQuestion()">← Əvvəlki</button>
+    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Növbəti sual →</button>
+  </div>
+</div>
+
+<!-- BOTTOM QUESTION NAVIGATOR -->
+<div class="q-nav-bar" id="qNavBar">
+  <div class="q-nav-label">Suallar</div>
+  <div class="q-nav-inner" id="qNavInner"></div>
+</div>
+
+<!-- RESULTS -->
+<div id="results">
+  <div class="result-hero">
+    <div class="score-ring">
+      <svg viewBox="0 0 180 180" width="180" height="180">
+        <circle class="track" cx="90" cy="90" r="76"/>
+        <circle class="fill" id="ringFill" cx="90" cy="90" r="76"
+          stroke-dasharray="477.5" stroke-dashoffset="477.5"/>
+      </svg>
+      <div class="score-center">
+        <span class="score-pct" id="scorePct">0%</span>
+        <span class="score-lbl">Nəticə</span>
+      </div>
+    </div>
+    <h2 class="result-title" id="resultTitle">—</h2>
+    <p class="result-sub" id="resultSub">—</p>
+  </div>
+
+  <div class="result-stats">
+    <div class="rstat correct-stat"><span class="rnum" id="correctCount">0</span><span class="rlbl">Düzgün</span></div>
+    <div class="rstat wrong-stat"><span class="rnum" id="wrongCount">0</span><span class="rlbl">Səhv</span></div>
+    <div class="rstat total-stat"><span class="rnum" id="totalCount">30</span><span class="rlbl">Ümumi</span></div>
+  </div>
+
+  <div class="review-header">
+    <h3 class="review-title">Sualların İcmalı</h3>
+    <div class="filter-tabs">
+      <button class="filter-tab active" onclick="filterReview('all', this)">Hamısı</button>
+      <button class="filter-tab" onclick="filterReview('correct', this)">Düzgün ✓</button>
+      <button class="filter-tab" onclick="filterReview('wrong', this)">Səhv ✗</button>
+    </div>
+  </div>
+  <div class="review-list" id="reviewList"></div>
+
+  <button class="retry-btn" onclick="location.reload()">Yeni Test Başlat ↻</button>
+</div>
+
+</div><!-- #app -->
+
+<script>
+// ─────────────────────────────────────────
+// QUESTION DATA  (all 333 questions)
+// ─────────────────────────────────────────
+const ALL_QUESTIONS = [
+  // 1
+  { text: "İki zər atılır. Cəmin 7 olması ehtimalını tapın.", opts: ["1/7","1/5","1/8","1/6","düzgün cavab yoxdur"], ans: 3 },
+  // 2
+  { text: "İki zər atılır. Cəmin 11 olması ehtimalını tapın.", opts: ["1/16","1/18","1/20","1/14","1/15"], ans: 1 },
+  // 3
+  { text: "İki zər atılır. Cəmin 12 olması ehtimalını tapın.", opts: ["1/24","1/36","1/32","1/30","1/18"], ans: 1 },
+  // 4
+  { text: "3 düzgün və 2 səhv cavab varsa, hər hansı iki cavabın eyni olması ehtimalını tapın.", opts: ["2/5","3/10","1/2","4/10","düzgün cavab yoxdur"], ans: 1 },
+  // 5
+  { text: "5 kartdan ibarət dəstdən 2 kart çəkilir. İkisinin də rəqəmli olması ehtimalını tapın (5 kartdan 3-ü rəqəmlidir).", opts: ["3/10","1/5","2/5","1/2","düzgün cavab yoxdur"], ans: 0 },
+  // 6
+  { text: "Bir qutu 3 ağ, 4 qara kürə var. 2 kürə çəkilir. İkisinin də ağ olması ehtimalını tapın.", opts: ["3/21","1/7","2/7","3/7","düzgün cavab yoxdur"], ans: 1 },
+  // 7
+  { text: "P(A) = 0,6, P(B) = 0,3, A və B asılı olmayan hadisələrdir. P(A+B) = ?", opts: ["0,72","0,82","0,9","0,78","düzgün cavab yoxdur"], ans: 1 },
+  // 8
+  { text: "P(A) = 0,4, P(B) = 0,5, A və B asılı olmayan hadisələrdir. P(AB) = ?", opts: ["0,9","0,45","0,2","0,3","düzgün cavab yoxdur"], ans: 2 },
+  // 9
+  { text: "Tam ehtimal düsturu hansıdır?", opts: ["P(A) = ΣP(Hᵢ)·P(A|Hᵢ)","P(A) = P(H)·P(A|H)","P(A|B) = P(AB)/P(B)","P(A+B) = P(A)+P(B)","düzgün cavab yoxdur"], ans: 0 },
+  // 10
+  { text: "Bayes düsturu nəyi hesablamağa xidmət edir?", opts: ["Tam ehtimal","A priori ehtimal","A posteriori ehtimal","Birləşmiş ehtimal","düzgün cavab yoxdur"], ans: 2 },
+  // 11
+  { text: "P(A) = 0,3 olarsa, P(Ā) = ?", opts: ["0,3","0,7","0,5","1","düzgün cavab yoxdur"], ans: 1 },
+  // 12
+  { text: "52 kartlı dəstdən bir kart çəkilir. Tuzu (♠A) çıxma ehtimalı nədir?", opts: ["1/52","4/52","13/52","1/4","düzgün cavab yoxdur"], ans: 0 },
+  // 13
+  { text: "52 kartlı dəstdən bir kart çəkilir. Uz (A) çıxma ehtimalı nədir?", opts: ["1/52","4/52","13/52","1/4","düzgün cavab yoxdur"], ans: 1 },
+  // 14
+  { text: "P(A|B) = P(AB)/P(B) — bu hansı düsturdur?", opts: ["Tam ehtimal","Bayes","Şərti ehtimal","Çoxlaşdırma","düzgün cavab yoxdur"], ans: 2 },
+  // 15
+  { text: "İki asılı olmayan hadisə üçün P(AB) = ?", opts: ["P(A)+P(B)","P(A)·P(B|A)","P(A)·P(B)","P(A)+P(B)-P(AB)","düzgün cavab yoxdur"], ans: 2 },
+  // 16
+  { text: "Bir sikkə 3 dəfə atılır. Tam 2 dəfə «yazı» çıxması ehtimalı?", opts: ["1/4","3/8","1/2","1/8","düzgün cavab yoxdur"], ans: 1 },
+  // 17
+  { text: "Kombinasiya düsturu C(n,k) = ?", opts: ["n!/(k!(n−k)!)","n!/k!","n!/(n−k)!","n·(n−1)···(n−k+1)","düzgün cavab yoxdur"], ans: 0 },
+  // 18
+  { text: "C(5,2) = ?", opts: ["20","10","5","15","düzgün cavab yoxdur"], ans: 1 },
+  // 19
+  { text: "C(6,3) = ?", opts: ["15","20","30","10","düzgün cavab yoxdur"], ans: 1 },
+  // 20
+  { text: "C(10,1) = ?", opts: ["1","5","10","100","düzgün cavab yoxdur"], ans: 2 },
+  // 21
+  { text: "5 kitabdan 3-nü neçə üsulla sıraya düzmək olar?", opts: ["10","30","60","120","düzgün cavab yoxdur"], ans: 2 },
+  // 22
+  { text: "A(n,k) = n!/(n−k)! — bu hansı kombinatorika düsturudur?", opts: ["Kombinasiya","Yerləşdirmə","Permutasiya","Binom","düzgün cavab yoxdur"], ans: 1 },
+  // 23
+  { text: "4 elementdən ibarət çoxluğun permutasiyaları sayı neçədir?", opts: ["4","8","16","24","düzgün cavab yoxdur"], ans: 3 },
+  // 24
+  { text: "Bir qutu 5 ağ, 3 qara kürə var. Bir kürə çəkilir. Qara olması ehtimalı?", opts: ["3/5","3/8","5/8","1/3","düzgün cavab yoxdur"], ans: 1 },
+  // 25
+  { text: "Klassik ehtimal modelində P(A) = m/n. Burada n nədir?", opts: ["Əlverişli hadisələr","Bütün eyniimkanlı elementar hadisələr","P(A) ilə eynidir","Düşdüyü hadisə sayı","düzgün cavab yoxdur"], ans: 1 },
+  // 26
+  { text: "Geometrik ehtimal nə zaman istifadə olunur?", opts: ["Sonlu sayda hadisə üçün","Sonsuz sayda eyniimkanlı hadisə üçün","Yalnız diskret hadisələr üçün","Yalnız normal paylanmada","düzgün cavab yoxdur"], ans: 1 },
+  // 27
+  { text: "P(A) = 0,4 olarsa P(Ā) nədir?", opts: ["0,4","0,6","0,8","1","düzgün cavab yoxdur"], ans: 1 },
+  // 28
+  { text: "Bir zər atılır. Cüt ədəd çıxma ehtimalı?", opts: ["1/3","1/2","2/3","1/6","düzgün cavab yoxdur"], ans: 1 },
+  // 29
+  { text: "P(A∪B) = P(A) + P(B) — bu bərabərlik nə zaman doğrudur?", opts: ["Həmişə","Yalnız A⊂B olduqda","A və B birgəolmayan olduqda","A və B asılı olmayan olduqda","düzgün cavab yoxdur"], ans: 2 },
+  // 30
+  { text: "İki zər atılır. Hər ikisinin eyni ədəd göstərməsi ehtimalı?", opts: ["1/12","1/6","1/4","1/36","düzgün cavab yoxdur"], ans: 1 },
+  // 31
+  { text: "Bernulli sınaqlarında A hadisəsinin baş vermə ehtimalı p = 0,6, n = 5. P₅(3) = ?", opts: ["0,3456","0,2765","0,3125","0,4096","düzgün cavab yoxdur"], ans: 0 },
+  // 32
+  { text: "Bernulli sınaqlarında ən böyük ehtimallı ədədi (k₀) tapmaq üçün şərt:", opts: ["np ≤ k₀ ≤ np+p","np−q ≤ k₀ ≤ np+p","k₀ = np","k₀ = npq","düzgün cavab yoxdur"], ans: 1 },
+  // 33
+  { text: "n=10, p=0,3 olduqda binomial paylanmanın riyazi gözləməsi:", opts: ["3","7","0,3","30","düzgün cavab yoxdur"], ans: 0 },
+  // 34
+  { text: "n=10, p=0,3 olduqda binomial paylanmanın dispersiyası:", opts: ["3","2,1","0,3","10","düzgün cavab yoxdur"], ans: 1 },
+  // 35
+  { text: "Puasson paylanmasında λ = np. n=1000, p=0,002 olduqda λ = ?", opts: ["0,2","0,5","2","5","düzgün cavab yoxdur"], ans: 2 },
+  // 36
+  { text: "Puasson paylanmasının riyazi gözləməsi nəyə bərabərdir?", opts: ["λ²","λ","1/λ","√λ","düzgün cavab yoxdur"], ans: 1 },
+  // 37
+  { text: "Puasson paylanmasının dispersiyası nəyə bərabərdir?", opts: ["λ²","λ","1/λ","2λ","düzgün cavab yoxdur"], ans: 1 },
+  // 38
+  { text: "Moavr-Laplasın lokal teoreminə görə Pₙ(k) ≈ ?", opts: ["(1/√npq)·φ(x)","npq·φ(x)","(1/npq)·φ(x)","φ(x)/√n","düzgün cavab yoxdur"], ans: 0 },
+  // 39
+  { text: "Moavr-Laplasın inteqral teoreminde x = (k − np)/√(npq). Bu düzgündürmü?", opts: ["Bəli","Xeyr","Yalnız böyük n üçün","Yalnız p=q üçün","düzgün cavab yoxdur"], ans: 0 },
+  // 40
+  { text: "Normal paylanmanın sıxlıq funksiyası: f(x) = ?", opts: ["(1/σ√(2π))·e^(-(x-a)²/(2σ²))","(1/2π)·e^(-x²/2)","σ·e^(-(x-a)²)","(1/σ)·e^(-x²/σ²)","düzgün cavab yoxdur"], ans: 0 },
+  // 41
+  { text: "Normal paylanmada a = 0, σ = 1 olduqda bu hansı paylanmadır?", opts: ["Standart normal paylanma","Poisson paylanması","Müntəzəm paylanma","Binomial paylanma","düzgün cavab yoxdur"], ans: 0 },
+  // 42
+  { text: "Normal paylanmada P(|X−a| < σ) ≈ ?", opts: ["0,68","0,95","0,997","0,75","düzgün cavab yoxdur"], ans: 0 },
+  // 43
+  { text: "Normal paylanmada P(|X−a| < 2σ) ≈ ?", opts: ["0,68","0,95","0,997","0,90","düzgün cavab yoxdur"], ans: 1 },
+  // 44
+  { text: "Normal paylanmada P(|X−a| < 3σ) ≈ ?", opts: ["0,68","0,95","0,997","0,99","düzgün cavab yoxdur"], ans: 2 },
+  // 45
+  { text: "X ~ N(a, σ²) olarsa, MX = ?", opts: ["σ²","a","σ","0","düzgün cavab yoxdur"], ans: 1 },
+  // 46
+  { text: "X ~ N(a, σ²) olarsa, DX = ?", opts: ["σ²","a","σ","a²","düzgün cavab yoxdur"], ans: 0 },
+  // 47
+  { text: "Üstlü (eksponensial) paylanmanın sıxlıq funksiyası (x ≥ 0):", opts: ["λe^(−λx)","e^(−λx)","λe^(λx)","(1/λ)e^(−x/λ)","düzgün cavab yoxdur"], ans: 0 },
+  // 48
+  { text: "Üstlü paylanmada MX = ?", opts: ["λ","1/λ","λ²","1/λ²","düzgün cavab yoxdur"], ans: 1 },
+  // 49
+  { text: "Üstlü paylanmada DX = ?", opts: ["λ","1/λ","1/λ²","λ²","düzgün cavab yoxdur"], ans: 2 },
+  // 50
+  { text: "Müntəzəm (uniform) paylanmada MX = ?", opts: ["a","b","(a+b)/2","(b−a)/2","düzgün cavab yoxdur"], ans: 2 },
+  // 51
+  { text: "Müntəzəm paylanmada (a,b) intervalında DX = ?", opts: ["(b−a)/2","(b+a)/2","(b−a)²/12","(b−a)²/6","düzgün cavab yoxdur"], ans: 2 },
+  // 52
+  { text: "Paylanma funksiyası F(x) = P(X < x). Bu funksiya harada artmazdır?", opts: ["Heç yerdə","Hər yerdə","Azalan funksiya","Artmayan funksiya deyil","düzgün cavab yoxdur"], ans: 3 },
+  // 53
+  { text: "F(−∞) = ? və F(+∞) = ?", opts: ["1 və 0","0 və 1","0 və 0","1 və 1","düzgün cavab yoxdur"], ans: 1 },
+  // 54
+  { text: "Kəsilməz X TK üçün P(a < X < b) = ?", opts: ["F(b) − F(a)","F(a) − F(b)","F(a) + F(b)","f(b) − f(a)","düzgün cavab yoxdur"], ans: 0 },
+  // 55
+  { text: "Sıxlıq funksiyası f(x) üçün ∫₋∞^(+∞) f(x)dx = ?", opts: ["0","f(0)","1","∞","düzgün cavab yoxdur"], ans: 2 },
+  // 56
+  { text: "Diskret TK-nin riyazi gözləməsi M(X) = ?", opts: ["Σxᵢ","Σxᵢpᵢ","Σpᵢ","max(xᵢ)","düzgün cavab yoxdur"], ans: 1 },
+  // 57
+  { text: "Dispersiya D(X) = M(X²) − [M(X)]². Bu düstur doğrudurmu?", opts: ["Bəli","Xeyr","Yalnız normal paylanma üçün","Yalnız diskret TK üçün","düzgün cavab yoxdur"], ans: 0 },
+  // 58
+  { text: "D(C) = ? (C sabitdir)", opts: ["C","C²","1","0","düzgün cavab yoxdur"], ans: 3 },
+  // 59
+  { text: "D(CX) = ?", opts: ["C·D(X)","C+D(X)","C²·D(X)","D(X)/C","düzgün cavab yoxdur"], ans: 2 },
+  // 60
+  { text: "M(CX) = ?", opts: ["C·M(X)","C+M(X)","C²·M(X)","M(X)/C","düzgün cavab yoxdur"], ans: 0 },
+  // 61
+  { text: "M(X+Y) = M(X) + M(Y) — bu xassə həmişə doğrudurmu?", opts: ["Xeyr","Bəli","Yalnız asılı olmayan üçün","Yalnız normal üçün","düzgün cavab yoxdur"], ans: 1 },
+  // 62
+  { text: "X və Y asılı olmayan TK üçün D(X+Y) = ?", opts: ["D(X)+D(Y)","D(X)·D(Y)","D(X)−D(Y)","M(X)+M(Y)","düzgün cavab yoxdur"], ans: 0 },
+  // 63
+  { text: "Orta kvadratik meyil σ(X) = ?", opts: ["D(X)","√D(X)","D(X)²","1/D(X)","düzgün cavab yoxdur"], ans: 1 },
+  // 64
+  { text: "Binomial paylanmada M(X) = ?", opts: ["np","npq","nq","p","düzgün cavab yoxdur"], ans: 0 },
+  // 65
+  { text: "Binomial paylanmada D(X) = ?", opts: ["np","npq","nq","n²p","düzgün cavab yoxdur"], ans: 1 },
+  // 66
+  { text: "Geometric paylanmada P(X=k) = p·q^(k−1). M(X) = ?", opts: ["1/p","1/q","p/q","q/p","düzgün cavab yoxdur"], ans: 0 },
+  // 67
+  { text: "Yığma funksiyası F(x) = P(X ≤ x). Kəsilməz TK üçün F'(x) = ?", opts: ["1","F(x)","f(x)","0","düzgün cavab yoxdur"], ans: 2 },
+  // 68
+  { text: "Böyük ədədlər qanununa görə: n → ∞ olarsa, seçmənin ortası nəyə yaxınlaşır?", opts: ["Dispersiyaya","Medianaya","Riyazi gözləməyə","Moda","düzgün cavab yoxdur"], ans: 2 },
+  // 69
+  { text: "Çebışev bərabərsizliyi: P(|X − MX| ≥ ε) ≤ ?", opts: ["D(X)/ε","D(X)/ε²","ε/D(X)","ε²/D(X)","düzgün cavab yoxdur"], ans: 1 },
+  // 70
+  { text: "Korrelyasiya əmsalı r = ?", opts: ["Cov(X,Y)","Cov(X,Y)/(σx·σy)","σx·σy","D(X)+D(Y)","düzgün cavab yoxdur"], ans: 1 },
+  // 71
+  { text: "Cov(X,Y) = M(XY) − MX·MY. Bu düstur doğrudurmu?", opts: ["Bəli","Xeyr","Yalnız asılı olmayan üçün","Yalnız diskret üçün","düzgün cavab yoxdur"], ans: 0 },
+  // 72
+  { text: "X və Y asılı olmayan olarsa Cov(X,Y) = ?", opts: ["1","−1","0","M(X)·M(Y)","düzgün cavab yoxdur"], ans: 2 },
+  // 73
+  { text: "Korrelyasiya əmsalı r-in qiymət aralığı?", opts: ["[0,1]","[−1,0]","[−1,1]","(−∞,+∞)","düzgün cavab yoxdur"], ans: 2 },
+  // 74
+  { text: "Merkezi momentlər β₁ = M(X−MX). β₁ = ?", opts: ["D(X)","0","1","MX","düzgün cavab yoxdur"], ans: 1 },
+  // 75
+  { text: "İkinci mərkəzi moment β₂ = ?", opts: ["M(X)","D(X)","σ(X)","M(X²)","düzgün cavab yoxdur"], ans: 1 },
+  // 76
+  { text: "X ~ Pois(λ), M²X = M(X²). Puasson paylanmasında M(X²) = ?", opts: ["λ","λ²","λ² + λ","λ+1","düzgün cavab yoxdur"], ans: 2 },
+  // 77
+  { text: "5 nəfər içindən 2 nəfər seçilir. Seçmə üsullarının sayı?", opts: ["20","10","25","5","düzgün cavab yoxdur"], ans: 1 },
+  // 78
+  { text: "Hadisə A üçün P(A) = 0. Bu o deməkdir ki:", opts: ["A mümkün deyil","A qeyri-mümkündür","A az ehtimallıdır","A mümkündür, amma baş vermir","düzgün cavab yoxdur"], ans: 3 },
+  // 79
+  { text: "Hadisə A üçün P(A) = 1. Bu o deməkdir ki:", opts: ["A həmişə baş verir","A etibarlı hadisədir","A demək olar ki, həmişə baş verir","A mütləq hadisədir (P=1 olarsa etibarlı sayılır)","düzgün cavab yoxdur"], ans: 3 },
+  // 80
+  { text: "3 sikkə atılır. 3 yazı çıxma ehtimalı?", opts: ["1/2","1/4","1/8","3/8","düzgün cavab yoxdur"], ans: 2 },
+  // 81
+  { text: "3 sikkə atılır. Ən azı 1 yazı çıxma ehtimalı?", opts: ["1/8","3/8","7/8","1/2","düzgün cavab yoxdur"], ans: 2 },
+  // 82
+  { text: "Mağazaya gətirilən 30 televizordan beşində gizli qüsur var. Alınan 2 televizorun qüsursuz olması ehtimalını tapın və cavabı 58p kimi qeyd edin.", opts: ["40","30","20","24","düzgün cavab yoxdur"], ans: 0 },
+  // 83 (q.86)
+  { text: "Sorğuya 6 kişi və 4 qadından ibarət qrup çəlb olunmuşdu. Sorğu aparılan 3 nəfərin hamısının qadın olması hadisəsinin ehtimalını tapın.", opts: ["1/2","düzgün cavab yoxdur","11/30","3/4","1/30"], ans: 4 },
+  // 84 (q.87)
+  { text: "Elektrik stansiyasında 4-ü qadın olmaqla 12 mühəndis işləyir. Hər gün növbəyə 3 işçi çıxır. Onların üçünün də kişi olması hadisəsinin ehtimalını tapın.", opts: ["14/55","düzgün cavab yoxdur","8/55","1/12","1/55"], ans: 0 },
+  // 85 (q.88)
+  { text: "Aşağıdakı təkliflərdən hansılar doğrudur?\nI) A hadisəsinin ehtimalı, bu hadisə üçün əlverişli olan elementar hadisələrin sayının bütün eyniimkanlı elementar hadisələrin sayına olan nisbətinə deyilir.\nII) A hadisəsinin ehtimalı, bu hadisə üçün əlverişli olan elementar hadisələrin sayının bütün eyniimkanlı elementar hadisələrin sayına olan hasilinə deyilir.\nIII) İki birgəolmayan A və B hadisələrinin cəminin ehtimalı bu hadisələrin ehtimalları cəminə bərabərdir: P(A+B) = P(A)+P(B)\nIV) İki birgə olan A və B hadisələrinin cəminin ehtimalı bu hadisələrin ehtimalları cəminə bərabərdir: P(A+B) = P(A)+P(B)", opts: ["I və IV","doğru cavab yoxdur","I və III","III) və IV)","yalnız I"], ans: 2 },
+  // 86 (q.89 - Riyaziyyat müəllimliyi)
+  { text: "\"Riyaziyyat\" və \"Riyaziyyat müəllimliyi\" ixtisası üzrə təhsilini başa vuranların say nisbəti 2:3 kimidir. \"Riyaziyyat\" ixtisası üzrə təhsil alanların 92%-i, \"Riyaziyyat müəllimliyi\" ixtisası üzrə təhsil alanların 95%-i ixtisasına uyğun iş tapa bilirlər. Bu ixtisaslar üzrə işə qəbul edilmiş hər hansı bir mütəxəssisin \"Riyaziyyat müəllimliyi\" ixtisasına aid olma ehtimalını tapın.", opts: ["düzgün cavab yoxdur","184/279","285/469","117/381","115/379"], ans: 2 },
+  // 87 (q.90)
+  { text: "Aşağıdakı təkliflərdən hansılar yanlışdır?\nI) A hadisəsinin ehtimalı ... nisbətinə deyilir.\nII) A hadisəsinin ehtimalı ... hasilinə deyilir.\nIII) İki birgəolmayan A və B hadisələrinin cəminin ehtimalı P(A+B) = P(A)+P(B)\nIV) İki birgə olan A və B hadisələrinin cəminin ehtimalı P(A+B) = P(A)+P(B)−P(AB) düsturu ilə təyin edilir.", opts: ["yalnız II","düzgün cavab yoxdur","III) və IV)","I) və III)","I) və IV)"], ans: 0 },
+  // 88 (q.91)
+  { text: "Sexdə 6 mühərrik var. Hər bir anda mühərrikin qoşulması ehtimalı 0,8-ə bərabərdir. Butun mühərrəklərin qoşulmaması ehtimalını tapın.", opts: ["0.000064","0, 064","0, 0062","0,062","0, 0064"], ans: 0 },
+  // 89 (q.92)
+  { text: "n sayda Bernulli sınaqlarında n=10 və p=0,9 olduqda ən böyük ehtimallı ədədi tapın.", opts: ["7","5 və 4","6 və 7","9","8"], ans: 3 },
+  // 90 (q.149)
+  { text: "Zərin üst üzündə 2 xalının düşməsinin ən böyük ehtimallı sayı 3-ə bərabərdirsə, oyun zərinin atılma sayını tapın.", opts: ["n=18","17 ≤ n ≤ 23","16 ≤ n ≤ 18","12 ≤ n ≤ 15","doğru cavab yoxdur"], ans: 1 },
+  // 91 (q.150)
+  { text: "Oyun zəri 20 dəfə atılır. Zərin üst üzündə 5 xalının düşməsi hadisəsinin nisbi tezliyinin ehtimaldan meylinin mütləq qiymətcə 0,02-ni aşmaması ehtimalını tapın.", opts: ["2Φ(0,24)","2Φ(0,81)","doğru cavab yoxdur","2Φ(2,25)","2Φ(1,44)"], ans: 0 },
+  // 92 (q.151)
+  { text: "X təsadüfi kəmiyyəti P(X=m) = C¹⁰⁰ₘ · 0,4ᵐ · 0,6¹⁰⁰⁻ᵐ ehtimalı ilə verilmişdir. X TK 0-dan 100-ə kimi qiymətlər alırsa D(4X+12) dispersiyasını tapın.", opts: ["396","372","24","384","doğru cavab yoxdur"], ans: 3 },
+  // 93 (q.152)
+  { text: "X TK P(X=m) = C¹⁰⁰ₘ · 0,6ᵐ · 0,4¹⁰⁰⁻ᵐ ehtimalı ilə verilmişdir. X TK 0-dan 100-ə kimi qiymətlər alırsa M(4X+12)-ni tapın.", opts: ["doğru cavab yoxdur","384","252","396","372"], ans: 2 },
+  // 94 (q.154)
+  { text: "Asılı olmayan 300 sınaqın hər birində hadisənin baş verməsi ehtimalı 0,75-ə bərabərdir. Hadisənin baş verməsinin nisbi tezliyinin ehtimaldan meylinin mütləq qiymətcə 0,01-i aşmaması ehtimalını tapın.", opts: ["2Φ(0,4)","2Φ(0,2)","doğru cavab yoxdur","2Φ(4)","2Φ(0,6)"], ans: 0 },
+  // 95 (q.155)
+  { text: "Asılı olmayan 8400 sınaqın hər birində hadisənin baş verməsi ehtimalı 0,7-ə bərabərdir. Hadisənin baş verməsinin nisbi tezliyinin ehtimaldan meylinin mütləq qiymətcə 0,0003-i aşmaması ehtimalını tapın.", opts: ["2Φ(4)","2Φ(0,25)","doğru cavab yoxdur","2Φ(0,06)","2Φ(0,6)"], ans: 3 },
+  // 96 (q.156)
+  { text: "Oyun zəri 3 dəfə atılır. Zərin üst üzündə 1 xalının 2 dəfədən az olmayaraq düşməsi ehtimalını tapın.", opts: ["düzgün cavab yoxdur","15/216","125/216","2/27","5/27"], ans: 3 },
+  // 97 (q.157)
+  { text: "Oyun zəri 3 dəfə atılır. Zərin üst üzündə 2 xalının heç olmasa bir dəfə düşməsi ehtimalını tapın.", opts: ["5/216","125/216","düzgün cavab yoxdur","91/216","1/216"], ans: 3 },
+  // 98 (q.158)
+  { text: "Oyun zəri 5 dəfə atılır. Zərin üst üzündə iki dəfə 4 xalının düşməsi ehtimalını tapın.", opts: ["0,42032","0,23091","0,16075","doğru cavab yoxdur","0,31095"], ans: 2 },
+  // 99 (q.159)
+  { text: "Hər hansı bölgədə yaşayan 100 ailəndən 80-nə internet xətti çəkilib. Həmin bölgədə yaşayan 400 ailənin 300-dən 350-yə qədərində internet olması ehtimalını tapın.", opts: ["doğru cavab yoxdur","Φ(2,5)−Φ(3,75)","Φ(3,75)−Φ(2,5)","Φ(3)−Φ(2,5)","Φ(3,75)+Φ(2,5)"], ans: 4 },
+  // 100 (q.160)
+  { text: "Hər hansı bölgədə yaşayan 100 ailəndən 90-nına internet xətti çəkilib. 900 ailəndən 800-ündə internet olması ehtimalını tapın.", opts: ["φ(1,11)/9","doğru cavab yoxdur","φ(2,1)/8","φ(4)/9","φ(1,11)/4"], ans: 0 },
+  // 101 (q.161)
+  { text: "Tutaq ki, standart olmayan detalın dəzgahdan buraxılması ehtimalı 0,002-yə bərabərdir. 2000 detaldan 4-nün standart olmaması ehtimalını tapın.", opts: ["(16/3)e⁻⁴","doğru cavab yoxdur","(32/4)e⁻⁴","(32/3)e⁻²","(32/3)e⁻⁴"], ans: 4 },
+  // 102 (q.162)
+  { text: "Firmada istehsal olunan malların reklama ehtiyacının olmasını deyənlər 60%, reklama ehtiyaci olmamasını deyənlər 40% faiz təşkil edir. Təsadüfi seçilmiş 3 işçidən ikisinin reklamın vacibliyini vurğulaması ehtimalını tapın.", opts: ["0,064","doğru cavab yoxdur.","0,0256","0,432","0,256"], ans: 3 },
+  // 103 (q.163)
+  { text: "İstehsal olunan cihazların 25%-ində qüsur aşkarlanır. Təsadüfi qaydada seçilmiş 12 cihazın qüsursuz olmasının ən böyük ehtimallı ədədini tapın.", opts: ["4","doğru cavab yoxdur.","9","3","8"], ans: 2 },
+  // 104 (q.164)
+  { text: "Statistikaya görə hər doğulan 10 uşaqdan altısı qızdır. Ailəndə 3 uşaq var, onların ikisinin oğlan olma ehtimalını tapın.", opts: ["0,3","0,125","doğru cavab yoxdur.","0,465","0, 096"], ans: 0 },
+  // 105 (q.165)
+  { text: "Hər sınaqda A hadisəsinin baş vermə ehtimalı 0,9-a bərabərdir. Bu hadisə üçün ən böyük ehtimallı ədədin 24-ə bərabər olması üçün neçə ardıcıl sınaq aparmaq lazımdır?", opts: ["31","doğru cavab yoxdur.","27","26","28"], ans: 3 },
+  // 106 (q.166)
+  { text: "Elektrik lampasiının saz olması ehtimalı 0,8-a bərabərdir. Təsadüfi götürülən 5 elektrik lampasiından 3-ünün saz işləmə hadisəsinin ehtimalını tapın.", opts: ["0,02048","0,0512","0,2048","0,512","doğru cavab yoxdur."], ans: 2 },
+  // 107 (q.167)
+  { text: "Dərslik 10000 nüsxə tirajla nəşr olunur. Dərsliyin çap olunmasında 0,0002 ehtimalla çap səhvinə yol verilmişdir. 10000 dərsliyin 4-ündə çap səhvinin olması ehtimalını tapın.", opts: ["e⁻²","düzgün cavab yoxdur.","(2/3)e⁻²","(15/4)e⁻²","(4/15)e²"], ans: 2 },
+  // 108 (q.169)
+  { text: "Bank 100 fermer təsərrüfatına faizsiz 10 il müddətinə kredit verir. Hər bir fermerin 10 il müddətinə alınan kredit məbləğini geri qaytarması ehtimalı 0,8-ə bərabərdir. Ən böyük ehtimallı ədədi tapın.", opts: ["düzgün cavab yoxdur","83","82","84","80"], ans: 4 },
+  // 109 (q.170)
+  { text: "Tutaq ki, standart olmayan detalın dəzgahdan buraxılması ehtimalı 0,004-ə bərabərdir. 1000 detaldan 5-nin standart olmaması ehtimalını tapın.", opts: ["(128/15)e⁻⁴","düzgün cavab yoxdur","(2/15)e⁻⁴","(124/15)e⁻⁴","(128/15)e⁴"], ans: 0 },
+  // 110 (q.171)
+  { text: "Aşağıdakı təkliflərdən hansılar doğrudur?\nI) Bernulli sınaqlarında Pₙ(m₀) ən böyük olarsa, m = m₀ ən böyük ehtimallı ədəd deyilir.\nII) Asılı olmayan sınaqlarda P(m) = Cⁿₘ·pᵐ·q^(n-m)\nIII) Asılı olan sınaqda p sabit, m dəfə baş verməsi ehtimalı P(m) ≈ (1/√npq)·(1/√2π)·e^(−x²/2)\nIV) Muavr-Laplasın inteqral düsturu: P(m₁;m₂) = Φ(x₂)−Φ(x₁)", opts: ["yalnız I","düzgün cavab yoxdur","yalnız IV","I və IV","yalnız III"], ans: 3 },
+  // 111 (q.172 — paylanma cədvəli)
+  { text: "X TK-nin paylanma qanunu:\n| x | 1 | 2 | 3 | 4 |\n| p | 0,2 | 0,1 | 0,3 | 0,4 |\n1 ≤ x ≤ 4 olduqda F(x) paylanma funksiyasının aldığı qiyməti tapın.", opts: ["0,1","düzgün cavab yoxdur","0,2","0,6","0,3"], ans: 3 },
+  // 112 (q.173)
+  { text: "X TK-nin paylanma qanunu:\n| x | 1 | 2 | 3 | 4 |\n| p | 0,2 | 0,3 | 0,1 | 0,4 |\nx < 1 olduqda F(x) paylanma funksiyasının aldığı qiyməti tapın.", opts: ["0","düzgün cavab yoxdur","0,1","0,2","0,3"], ans: 0 },
+  // 113 (q.174)
+  { text: "X TK-nin paylanma qanunu:\n| x | 2 | 4 | 5 |\n| p | 0,5 | 0,2 | 0,3 |\n4 ≤ x < 5 olduqda paylanma funksiyasının aldığı qiyməti tapın.", opts: ["0,5","düzgün cavab yoxdur","0,2","0,7","0,1"], ans: 3 },
+  // 114 (q.175)
+  { text: "X TK-nin paylanma qanunu:\n| x | 10 | 20 | 30 | 40 | 50 |\n| p | 0,2 | 0,3 | 0,35 | 0,1 | 0,05 |\nPaylanma qanunundan 30 < x ≤ 40 olduqda F(x)-in aldığı qiyməti tapın.", opts: ["düzgün cavab yoxdur","0,3","0,1","0,35","0,85"], ans: 4 },
+  // 115 (q.176)
+  { text: "Asılı olmayan X və Y diskret TK-lərinin paylanma qanunları:\nX: −1→0,3; 0→0,5; 1→0,2\nY: 0→0,6; 1→0,1; 3→0,3\nM(2XY) riyazi gözləməsini tapın.", opts: ["düzgün cavab yoxdur","0,5","0,6","-0,2","1"], ans: 3 },
+  // 116 (q.177 — Poisson M(2X))
+  { text: "X diskret TK-nin paylanma qanunu Poisson paylanmasıdır (P(X=k) = λᵏe⁻λ/k!). M(2X)-i tapın.", opts: ["2/λ","1/λ","2λ","λ","1/λ²"], ans: 2 },
+  // 117 (q.178)
+  { text: "X diskret TK tam müsbət qiymətlərini P(x=m) = (2ᵐ/m!)·e⁻² ehtimalı ilə alır. M(X−MX+2X−1) riyazi gözləməsini tapın.", opts: ["3","0","-1","1/2","2"], ans: 0 },
+  // 118 (q.179)
+  { text: "MX=a olduqda M(2X−a) riyazi gözləməsini tapın.", opts: ["a","−a","2","3a","0"], ans: 0 },
+  // 119 (q.180)
+  { text: "MX=2 olduqda Z=X−2 kəmiyyətinin riyazi gözləməsini tapın.", opts: ["4","−2","2","0","1"], ans: 3 },
+  // 120 (q.181)
+  { text: "MX=3, MY=2 olduqda Z=2X−3Y+5 TK-nin riyazi gözləməsini tapın.", opts: ["1","−3","0","2","5"], ans: 4 },
+  // 121 (q.182)
+  { text: "X diskret TK tam müsbət qiymətlərini P(x=m) = (3ᵐ/m!)·e⁻³ ehtimalı ilə alır. M(5X+1) riyazi gözləməsini tapın.", opts: ["1","−3","5","3","16"], ans: 4 },
+  // 122 (q.183)
+  { text: "X TK 0-dan 10-a qədər mənfi olmayan P(x=m) = C¹⁰ₘ·0,8ᵐ·0,2¹⁰⁻ᵐ ehtimalı ilə qiymət alarsa M(2X+MX)-i tapın.", opts: ["8","16","24","MX","20"], ans: 2 },
+  // 123 (q.184)
+  { text: "X TK 0-dan 10-a qədər müsbət P(x=m) = C¹⁰ₘ·0,2ᵐ·0,8¹⁰⁻ᵐ ehtimalı ilə qiymət alarsa M(2X−3)-i tapın.", opts: ["1","1/2","2","−3","1/3"], ans: 0 },
+  // 124 (q.185)
+  { text: "X TK 0-dan 5-ə qədər tam müsbət P(x=m) = C⁵ₘ·0,1ᵐ·0,9⁵⁻ᵐ ehtimalı ilə qiymət alarsa M(2X+3) riyazi gözləməsini tapın.", opts: ["4","1","2","0,1","0,9"], ans: 0 },
+  // 125 (q.186)
+  { text: "X və Y kəsimaz TK-lərin riyazi gözlləmləri müvafiq olaraq M(X)=1, M(Y)=2 olarsa, Z=5X−2Y+4 olduqda M(Z) tapın.", opts: ["2","3","4","5","6"], ans: 3 },
+  // 126 (q.187)
+  { text: "Puasson paylanması hansı düsturla verilir?", opts: ["Pₙ(X=k) = Cₙᵏpᵏqⁿ⁻ᵏ","Pₙ(X=k) ≈ (λᵏ/k!)e⁻λ, k=0,1,2...","P(X=k) = p·qᵏ (k=0,1,2,...)","f(x) = (1/σ√2π)·e^(−(x−a)²/(2σ²))","düzgün cavab yoxdur"], ans: 1 },
+  // 127 (q.188)
+  { text: "X TK-nin paylanması cədvəl şəklindədir:\n| xᵢ | 1 | 4 | 6 | 8 |\n| pᵢ | 0,1 | 0,5 | 0,2 | 0,2 |\nOnun 0 ≤ x < 6 aralığına düşmə ehtimalını hesablayın.", opts: ["0,5","0,7","0,6","doğru cavab yoxdur","0,8"], ans: 2 },
+  // 128 (q.189)
+  { text: "Hər 100 sınaqda A hadisəsinin baş vermə ehtimalı 0,7-yə bərabər olarsa, A hadisəsinin baş verməsini göstərən X TK-nin riyazi gözləməsini tapın.", opts: ["60","40","20","70","50"], ans: 3 },
+  // 129 (q.190)
+  { text: "Hədəfə 45 atəş açılır. Hər bir atəşin hədəfə dəyməsi ehtimalı 1/3-yə bərabərdir. X TK-yi ilə hədəfə dəyən güllərin sayını işarə edək. X TK-nin riyazi gözləməsini tapın.", opts: ["0,5","1","5","10","15"], ans: 4 },
+  // 130 (q.191)
+  { text: "200 sınaqın hər birində A hadisəsinin baş verməsi ehtimalı 0,4-ə bərabərdir. A hadisəsinin 200 sınaqda baş verməsini göstərən X TK-nin riyazi gözləməsini tapın.", opts: ["50","70","60","80","40"], ans: 3 },
+  // 131 (q.192)
+  { text: "Fəhllə 3 dəzgahda işləyir. Fəhlənin növbə ərzində hər bir dəzgahda işləməsi ehtimalı 0,8-yə bərabərdir. X TK-yi fəhlənin növbə ərzində işlədiyi dəzgahların sayını ifadə edir. X-in riyazi gözləməsini tapın.", opts: ["1,3","4,1","2,4","3,2","5,9"], ans: 2 },
+  // 132 (q.197)
+  { text: "Müəssisədə məmulatın 20%-i birinci, 30%-i ikinci, 50%-i üçüncü maşında istehsal olunur. Bu maşınların buraxdığı məmulatın uyğun olaraq 5%, 4%, 2%-i yararsızdır. İxtiyari götürülmüş bir yararsız məmulatın 1-ci maşında hazırlanması ehtimalını tapın.", opts: ["20/69","Düzgün cavab yoxdur.","19/69","5/16","13/69"], ans: 3 },
+  // 133 (q.198)
+  { text: "X və Y TK-lərinin riyazi gözlləmləri uyğun olaraq: M(X)=50, M(Y)=30 olarsa, Z=12X+15Y−10 TK-nin riyazi gözləməsini tapın.", opts: ["950","11","1060","1040","düzgün cavab yoxdur"], ans: 3 },
+  // 134 (q.199)
+  { text: "X TK-nin paylanma qanunu aşağıdakı şəkildədir:\n| x | x₁=4 | x₂=6 | x₃ |\n| p | 0,5 | 0,3 | p₃ |\nMX=8 olduqda x₃-ü tapın.", opts: ["düzgün cavab yoxdur","4,2","1,8","20","21"], ans: 4 },
+  // 135 (q.200)
+  { text: "MX=5; MY=3 verilir. Z = (1/5)X + (1/3)Y TK-nin riyazi gözləməsini tapın.", opts: ["düzgün cavab yoxdur","1/3","2","1/5","1/15"], ans: 2 },
+  // 136 (q.201)
+  { text: "X və Y kəsimaz TK-lərin riyazi gözlləmləri müvafiq olaraq M(X)=2, M(Y)=1 olarsa, Z=X+Y+1 olduqda M(Z) tapın.", opts: ["5","4","3","2","1"], ans: 1 },
+  // 137 (q.202)
+  { text: "M(X)=2, M(Y)=1 olarsa, Z=5X+Y+1 olduqda M(Z) tapın.", opts: ["13","12","14","15","10"], ans: 1 },
+  // 138 (q.203)
+  { text: "M(X)=1, M(Y)=2 olarsa, Z=5X−2Y+4 olduqda M(Z) tapın.", opts: ["6","4","2","3","5"], ans: 4 },
+  // 139 (q.204)
+  { text: "M(X)=3, M(Y)=1 olarsa, Z=4X−3Y+1 olduqda M(Z) tapın.", opts: ["10","30","5","3","20"], ans: 0 },
+  // 140 (q.205)
+  { text: "M(X)=2, M(Y)=2 olarsa, Z=X−5Y+1 olduqda M(Z) tapın.", opts: ["-4","-2","-7","-5","-3"], ans: 2 },
+  // 141 (q.206)
+  { text: "M(X)=1, M(Y)=2 olarsa, Z=X−3Y+7 olduqda M(Z) tapın.", opts: ["4","2","1","5","3"], ans: 1 },
+  // 142 (q.213 — paylanma qanunu M(x)=6)
+  { text: "X kəsilməz TK-nin paylanması:\n| xᵢ | 0 | x₂ | 8 |\n| pᵢ | 0,2 | ? | 0,7 |\nM(x)=6 olarsa, x₂-ni tapın.", opts: ["4","3","8","1","doğru cavab yoxdur"], ans: 0 },
+  // 143 (q.214)
+  { text: "M(X)=9, M(Y)=2 olarsa, Z=2X−2Y+1 olduqda M(Z) tapın.", opts: ["15","11","13","14","12"], ans: 0 },
+  // 144 (q.215)
+  { text: "M(X)=1, M(Y)=6 olarsa, Z=X−Y+4 olduqda M(Z) tapın.", opts: ["-1","-5","-3","-4","-2"], ans: 0 },
+  // 145 (q.216)
+  { text: "M(X)=3, M(Y)=4 olarsa, Z=2X+Y+3 olduqda M(Z) tapın.", opts: ["15","14","13","12","11"], ans: 2 },
+  // 146 (q.217)
+  { text: "M(X)=2, M(Y)=5 olarsa, Z=2X−Y+3 olduqda M(Z) tapın.", opts: ["2","1","3","4","5"], ans: 0 },
+  // 147 (q.218)
+  { text: "X TK-nin paylanması:\n| xᵢ | 10 | 20 | 30 |\n| pᵢ | 0,2 | 0,5 | 0,3 |\nZ=3X−2,4 TK-nin riyazi gözləməsini tapın.", opts: ["60,6","210,6","120,4","65,4","düzgün cavab yoxdur"], ans: 0 },
+  // 148 (q.219)
+  { text: "X TK-nin paylanması:\n| xᵢ | 1 | 4 | 6 | 8 |\n| pᵢ | 0,1 | 0,5 | 0,2 | 0,2 |\nOnun 0 ≤ x < 4 aralığına düşmə ehtimalını hesablayın.", opts: ["0,5","0,6","0,7","0,1","düzgün cavab yoxdur"], ans: 3 },
+  // 149 (q.221 — shooter)
+  { text: "Atıcının hədəfi vurması ehtimalı 0,65-yə bərabərdir. O, hədəfə 2 güllə atıb. Atıcının hədəfi vurmasının paylanma qanununu yazın (X TK atıcının hədəfi vurma kəmiyyətləridir).", opts: [
+    "x:0→0,35; 1→0,04; 2→0,61",
+    "x:0→0,4225; 1→0,455; 2→0,1225",
+    "x:0→0,1225; 1→0,455; 2→0,4225",
+    "doğru cavab yoxdur",
+    "x:0→0,65; 1→0,04; 2→0,35"
+  ], ans: 2 },
+  // 150 (q.222)
+  { text: "X TK-nin paylanması:\n| xᵢ | 1 | 4 | 6 | 8 |\n| pᵢ | 0,05 | 0,55 | 0,12 | 0,28 |\nOnun 0 ≤ x ≤ 5 aralığına düşmə ehtimalını hesablayın.", opts: ["doğru cavab yoxdur","0,8","0,6","0,5","0,7"], ans: 2 },
+  // 151 (q.223)
+  { text: "X TK-nin paylanması:\n| xᵢ | 10 | 20 | 50 |\n| pᵢ | 0,1 | 0,6 | 0,3 |\nOnun riyazi gözləməsini tapın.", opts: ["21,6","doğru cavab yoxdur","216","28","100"], ans: 3 },
+  // 152 (q.224)
+  { text: "X TK-nin paylanması:\n| xᵢ | 10 | 20 | 30 |\n| pᵢ | 0,2 | 0,5 | 0,3 |\nZ=7X+4 TK-nin riyazi gözləməsini tapın.", opts: ["doğru cavab yoxdur","210","151","147","150"], ans: 2 },
+  // 153 (q.225)
+  { text: "X TK-nin paylanması:\n| x | 0 | 1 | 2 |\n| p | 0,6 | ? | 0,1 |\nOnun riyazi gözləməsini tapın.", opts: ["1,1","0,5","2,2","1,2","doğru cavab yoxdur"], ans: 1 },
+  // 154 (q.226)
+  { text: "X və Y TK-lərinin riyazi gözlləmləri M(X)=5, M(Y)=3 olarsa, Z=12X−11Y+1 TK-nin riyazi gözləməsini tapın.", opts: ["10","11","doğru cavab yoxdur","28","111"], ans: 3 },
+  // 155 (q.227)
+  { text: "X və Y TK-lərinin riyazi gözlləmləri M(X)=21, M(Y)=16 olarsa, Z=40X−11Y−25 TK-nin riyazi gözləməsini tapın.", opts: ["639","doğru cavab yoxdur","150","680","689"], ans: 0 },
+  // 156 (q.228)
+  { text: "Diskret x TK-nin paylanma qanunu:\n| x | 1 | 2 | 3 |\n| p | 0,3 | 0,4 | 0,3 |\nM(5x²−7)-nı tapmalı.", opts: ["5","düzgün cavab yoxdur.","0,2","13,8","16"], ans: 4 },
+  // 157 (q.229)
+  { text: "Həndəsi paylanma hansı düsturla verilir?", opts: ["düzgün cavab yoxdur","f(x) = (1/σ√2π)e^(−(x−a)²/(2σ²))","Pₙ(X=k) = Cₙᵏpᵏqⁿ⁻ᵏ","P(X=k) = p·qᵏ (k=0,1,2,...)","Pₙ(X=k) ≈ (λᵏ/k!)e⁻λ"], ans: 3 },
+  // 158 (q.231)
+  { text: "Diskret x TK-nin paylanma qanunu:\n| x | −1 | 0 | 2 |\n| p | 0,2 | 0,3 | 0,5 |\nDx-ı tapmalı.", opts: ["0,7","1,56","1,4","düzgün cavab yoxdur","0,9"], ans: 1 },
+  // 159 (q.232)
+  { text: "Binomial paylanmasının dispersiyasını tapın.", opts: ["np","npq","nq","np+q","Düzgün cavab yoxdur."], ans: 1 },
+  // 160 (q.233)
+  { text: "Dəmir pulu neçə dəfə atmaq lazımdır ki, hər hansı üzünün düşməsini göstərən X TK-nin dispersiyası 6-ya bərabər olsun.", opts: ["6","24","Düzgün cavab yoxdur.","10","12"], ans: 1 },
+  // 161 (q.234)
+  { text: "Bir oyun zərini bir dəfə atdıqda düşən xalların sayının riyazi gözləməsini tapın.", opts: ["3,2","3,4","3,5","3,6","Düzgün cavab yoxdur."], ans: 2 },
+  // 162 (q.236)
+  { text: "D(X+Y) = D(X) hansı halda doğrudur?", opts: ["X və Y asılı olmayan TK-lər olduqda","X və Y diskret TK-lər olduqda","Y – sabit kəmiyyət olduqda","Y kəsilməz TK olduqda","Düzgün cavab yoxdur."], ans: 2 },
+  // 163 (q.237)
+  { text: "X TK-nin paylanması:\n| xᵢ | 10 | 20 | 50 |\n| pᵢ | 0,1 | 0,6 | 0,3 |\nOnun dispersiyasını tapın.", opts: ["doğru cavab yoxdur","28","216","1000","21,6"], ans: 2 },
+  // 164 (q.238)
+  { text: "Diskret X TK-nin paylanma qanunu:\n| X | −1 | 0 | 1 |\n| p | 0,5 | 0,2 | 0,3 |\nD(3X−7) dispersiyasını tapın.", opts: ["6,84","0,3","6,52","Düzgün cavab yoxdur","2,8"], ans: 0 },
+  // 165 (q.239)
+  { text: "Puasson paylanmasında dispersiya nəyə bərabərdir?", opts: ["3λ","λ","2/λ","3/λ","Düzgün cavab yoxdur"], ans: 1 },
+  // 166 (q.240)
+  { text: "P(k) ≈ (λᵏ/k!)e⁻λ düsturu ilə hesablanan Puasson paylanmasında M²X nəyə bərabərdir?", opts: ["Düzgün cavab yoxdur","1/λ","λ²","3λ","2/λ"], ans: 2 },
+  // 167 (q.241)
+  { text: "Diskret X və Y TK-lərinin paylanma qanunları:\nX: 1→0,3; 2→0,7  |  Y: 3→0,4; 4→0,6\nM(X²+Y²) riyazi gözləməsini tapın.", opts: ["16,3","düzgün cavab yoxdur","3,1","3,6","9,6"], ans: 0 },
+  // 168 (q.242)
+  { text: "Diskret X TK-nin paylanma qanunu:\n| X | 1 | 2 | 3 |\n| p | 0,2 | 0,3 | 0,5 |\nM(2X²+1) riyazi gözləməsini tapın.", opts: ["5,9","1,2","0,2","düzgün cavab yoxdur","12,8"], ans: 4 },
+  // 169 (q.243)
+  { text: "DX=2, DY=3 olduqda D(8X−5Y+7) dispersiyasını tapın.", opts: ["25","64","203","128","75"], ans: 2 },
+  // 170 (q.244)
+  { text: "DX=a olduqda D(2X−D(X)) dispersiyasını tapın.", opts: ["4a","2","a","2a","0"], ans: 0 },
+  // 171 (q.245)
+  { text: "DX=a olduqda D(2X−a) dispersiyasını tapın.", opts: ["a","0","4a","3a","2a"], ans: 2 },
+  // 172 (q.246)
+  { text: "X diskret TK Puasson qanunu ilə paylanıb və λ=0,3 olduqda D(D(X)−5X) dispersiyasını tapın.", opts: ["25","7,5","0,3","5","-5"], ans: 1 },
+  // 173 (q.247)
+  { text: "X diskret TK Puasson qanunu ilə paylanıb və λ=0,3 olduqda M(3M²X−5X) riyazi gözləməsini tapın.", opts: ["1","-5","3","−1,23","−2"], ans: 3 },
+  // 174 (q.248)
+  { text: "X diskret TK tam müsbət qiymətlərini P(x=m) = (2ᵐ/m!)e⁻² ehtimalı ilə alır. D(3−5X+2DX) dispersiyasını tapın.", opts: ["-5","2","50","1","3"], ans: 2 },
+  // 175 (q.249)
+  { text: "X diskret TK müsbət tam qiymətlərini P(x=m) = (3ᵐ/m!)e⁻³ ehtimalı ilə alır. D(M(5X)+2X) dispersiyasını tapın.", opts: ["12","0","4","2","5"], ans: 0 },
+  // 176 (q.250)
+  { text: "X kəsilməz TK a=0,8 və σ²=1 parametrli normal paylanmaya malikdir. D(X−MX) dispersiyasını tapın.", opts: ["1","0,8","0","0,2","MX"], ans: 0 },
+  // 177 (q.251)
+  { text: "X TK 0-dan 5-ə qədər tam müsbət qiymətlərini P(x=m) = C⁵ₘ·0,3ᵐ·0,7⁵⁻ᵐ ehtimalı ilə qiymət alarsa, D(2MX²+3X) dispersiyasını tapın.", opts: ["0","4","3","2MX²","9,45"], ans: 4 },
+  // 178 (q.252)
+  { text: "X TK 0-dan 10-a qədər tam müsbət P(x=m) = C¹⁰ₘ·0,2ᵐ·0,8¹⁰⁻ᵐ ehtimalı ilə qiymət alarsa, D(2X+3DX) dispersiyasını tapın.", opts: ["3DX","4","6,4","0,2","0,8"], ans: 2 },
+  // 179 (q.253)
+  { text: "X TK 0-dan 5-ə qədər tam müsbət P(x=m) = C⁵ₘ·0,9ᵐ·0,1⁵⁻ᵐ ehtimalı ilə qiymət alarsa D(M²X+DX−X) dispersiyasını tapın.", opts: ["M²X","2","0,45","0","1"], ans: 2 },
+  // 180 (q.254)
+  { text: "X TK 0-dan 10-a qədər tam nüsbət P(x=m) = C¹⁰ₘ·0,2ᵐ·0,8¹⁰⁻ᵐ ehtimalı ilə qiymət alarsa, D(2MX+X) dispersiyasını tapın.", opts: ["0","2MX","MX","1,6","2"], ans: 3 },
+  // 181 (q.255)
+  { text: "Hər 100 sınaqda A hadisəsinin baş vermə ehtimalı 0,6-ya bərabər olarsa, A hadisəsinin baş verməsini göstərən X TK-nin riyazi gözləməsini və dispersiyasını tapın. Cavabda onların cəmini yazın.", opts: ["87","62","65","Düzgün cavab yoxdur.","84"], ans: 4 },
+  // 182 (q.256 — DX=1/9, DY=1/16)
+  { text: "Asılı olmayan X və Y TK-lərinin dispersiyaları DX=1/9; DY=1/16 verilir. Z=3X+4Y TK-nin dispersiyasını tapın.", opts: ["1/3","Düzgün cavab yoxdur","2","1/9","1/16"], ans: 2 },
+  // 183 (q.257)
+  { text: "Asılı olmayan X və Y diskret TK-lərin dispersiyaları DX=1,5; DY=1 verilir. Z=2X−3Y+1 TK-nin dispersiyasını tapın.", opts: ["5","Düzgün cavab yoxdur","15","19","6"], ans: 2 },
+  // 184 (q.258)
+  { text: "X TK-nin paylanması:\n| xᵢ | −10 | 0 | 20 |\n| pᵢ | 0,2 | 0,5 | 0,3 |\nOnun ikinci tərtib mərkəzi momentini tapın.", opts: ["124","140","24","4","doğru cavab yoxdur"], ans: 0 },
+  // 185 (q.259)
+  { text: "Fəhlə 4 dəzgahda işləyir. Fəhlənin növbə ərzindən hər bir dəzgahda işləməsi ehtimalı 0,8-ə bərabərdir. X TK fəhlənin növbə ərzindəişlədiyi dəzgahların sayını ifadə edirsə, onun orta kvadratik meylini tapın.", opts: ["0,8","0,2","0,08","0,64","doğru cavab yoxdur"], ans: 0 },
+  // 186 (q.260)
+  { text: "X və Y TK-lərinin dispersiyaları uyğun olaraq: D(X)=6, D(Y)=8 olarsa, Z=4X+11Y−25 TK-nin dispersiyasını tapın.", opts: ["doğru cavab yoxdur","2345","1064","11","1080"], ans: 2 },
+  // 187 (q.261 — 2-ci mərk. moment)
+  { text: "X TK-nin paylanması:\n| xᵢ | 10 | 20 | 50 |\n| pᵢ | 0,1 | 0,6 | 0,3 |\nOnun orta kvadratik meylini tapın.", opts: ["√6","√26","doğru cavab yoxdur","6√6","16"], ans: 3 },
+  // 188 (q.262)
+  { text: "X və Y TK-lərinin dispersiyaları D(X)=5, D(Y)=3 olarsa, Z=2X−5Y+16 TK-nin dispersiyasını tapın.", opts: ["111","95","11","doğru cavab yoxdur","10"], ans: 1 },
+  // 189 (q.263)
+  { text: "Fəhlə 2 dəzgahda işləyir. Fəhlənin növbə ərzindən hər bir dəzgahda işləməsi ehtimalı 0,8-ə bərabərdir. X TK fəhlənin növbə ərzindəişlədiyi dəzgahların sayını ifadə edirsə, onun dispersiyasını tapın.", opts: ["doğru cavab yoxdur","1,2","0,32","0,64","1,6"], ans: 2 },
+  // 190 (q.264)
+  { text: "Diskret X TK-nin momenti üçün düsturlardan biri yanlışdır:\nβ₃ = M(X−MX)³ = MX³−3MX²·MX+2M³X\nβ₂ = M(X−MX)² = DX\nβ₁ = M(X−MX) = 0\nβ₀ = M(X−MX)⁰ = 0", opts: ["β₃","doğru cavab yoxdur.","β₂","β₁","β₀"], ans: 4 },
+  // 191 (q.265)
+  { text: "Diskret X TK-nin sonlu M(X) riyazi gözləməsi varsa, M[X−M(X)]² ifadəsinə X TK-nin .......... deyilir.", opts: ["doğru cavab yoxdur.","Riyazi gözlləməsi","Momenti","Dispersiyası","Orta kvadratik meyli"], ans: 3 },
+  // 192 (q.266)
+  { text: "Riyazi gözlləmənin xassəsinə aid deyil:", opts: ["M(CX) = CM(X)","doğru cavab yoxdur.","M(C) = C","M(X+Y) = M(X)+M(Y)","M(X−Y) = M(X)+M(Y)"], ans: 4 },
+  // 193 (q.267)
+  { text: "Diskret X TK-nin sonlu M(X) riyazi gözləməsi varsa, M[X−M(X)]² ifadəsinin kvadrat köküncə X TK-nin .......... deyilir.", opts: ["Riyazi gözlləməsi","düzgün cavab yoxdur","Orta kvadratik meyli","Dispersiyası","Momenti"], ans: 2 },
+  // 194 (q.268)
+  { text: "Diskret X TK-nin momenti üçün düsturlardan biri doğrudur:", opts: ["β₃ = MX³−3MX²·MX+2M³X","β₀ = M(X−MX)⁰ = 0","β₁ = M(X−MX) = 1","β₂ = M(X−MX)² = DX","düzgün cavab yoxdur"], ans: 3 },
+  // 195 (q.269)
+  { text: "Dispersiyanın xassəsinə aid deyil:", opts: ["D(CX) = CD(X)","düzgün cavab yoxdur","D(X+Y) = D(X)+D(Y)","D(C)=0","D(X−Y) = D(X)+D(Y)"], ans: 0 },
+  // 196 (q.270 — 2nd central moment)
+  { text: "X TK-nin paylanması:\n| xᵢ | −10 | 0 | 20 |\n| pᵢ | 0,4 | 0,4 | 0,2 |\nOnun ikinci tərtib mərkəzi momentini tapın.", opts: ["120","4","124","140","düzgün cavab yoxdur"], ans: 0 },
+  // 197 (q.271)
+  { text: "D(X)=25, D(Y)=12 olarsa, Z=4X−15Y−255 TK-nin dispersiyasını tapın.", opts: ["280","2875","3100","150","düzgün cavab yoxdur"], ans: 2 },
+  // 198 (q.272)
+  { text: "Qeyri-məhdud sayda detallar qüsur aşkar edilənə qədər yoxlanılır. Hər bir detalın qüsurlu olma ehtimalının 0,25 olduğunu nəzərə alıb, X diskret TK-nin dispersiyasını tapın.", opts: ["doğru cavab yoxdur","5","12","4","16"], ans: 2 },
+  // 199 (q.273)
+  { text: "Qeyri-məhdud sayda detallar qüsur aşkar edilənə qədər yoxlanılır. Hər bir detalın qüsurlu olma ehtimalının 0,25 olduğunu nəzərə alıb, X diskret TK-nin riyazi gözləməsini tapın.", opts: ["doğru cavab yoxdur","12","4","8","6"], ans: 2 },
+  // 200 (q.274)
+  { text: "Oyun zəri 60 dəfə atılır. Bu sınaqlarda zərin üst üzündə 3 xalının düşmə sayını göstərən X TK-nin dispersiyasını tapın.", opts: ["25/3","10","50/3","25","doğru cavab yoxdur"], ans: 0 },
+  // 201 (q.275)
+  { text: "Oyun zəri 60 dəfə atılır. Bu sınaqlarda zərin üst üzündə 6 xalının düşmə sayını göstərən X TK-nin riyazi gözləməsini tapın.", opts: ["65","doğru cavab yoxdur","10","5","54"], ans: 2 },
+  // 202 (q.276 — 2nd central moment 4 values)
+  { text: "X TK-nin paylanması:\n| xᵢ | 10 | 20 | 40 | 60 |\n| pᵢ | 0,2 | 0,4 | 0,3 | 0,1 |\nOnun ikinci tərtib mərkəzi momentini tapın.", opts: ["doğru cavab yoxdur","28","970","1020","236"], ans: 4 },
+  // 203 (q.277 — 1st initial moment)
+  { text: "X TK-nin paylanması:\n| xᵢ | 10 | 20 | 40 | 60 |\n| pᵢ | 0,2 | 0,4 | 0,3 | 0,1 |\nOnun birinci tərtib başlanğıc momentini tapın.", opts: ["24,6","970","doğru cavab yoxdur","27","28"], ans: 4 },
+  // 204 (q.278 — 1st initial moment 3 values)
+  { text: "X TK-nin paylanması:\n| xᵢ | 10 | 20 | 50 |\n| pᵢ | 0,2 | 0,5 | 0,3 |\nOnun birinci tərtib başlanğıc momentini tapın.", opts: ["doğru cavab yoxdur","24,6","970","27","28"], ans: 3 },
+  // 205 (q.279 — F(x) kəsilməz)
+  { text: "X kəsilməz TK, F(x) = {0, x≤0; x, 0<x≤1; 1, x>1} paylanma funksiyası ilə verilmişdir. f(x) sıxlıq funksiyasını tapın.", opts: ["f(x)=1/x²","Düzgün cavab yoxdur","f(x)=1, x∈[0,1]; 0 x∉[0,1]","f(x)=x, x∈[0,1]; 0 x∉[0,1]","f(x)=1/x³"], ans: 2 },
+  // 206 (q.280)
+  { text: "Asılı olmayan X və Y TK-ləri uyğun olaraq (2;8) və (10;16) intervalında müntəzəm paylanmışdır. M(2XY)-i tapın.", opts: ["3","130","Düzgün cavab yoxdur","13","2"], ans: 1 },
+  // 207 (q.281)
+  { text: "X kəsilməz TK (2,4) intervalında müntəzəm paylanmışdır. M(X+2)-i tapın.", opts: ["5","6","3","Düzgün cavab yoxdur","5/3"], ans: 0 },
+  // 208 (q.282)
+  { text: "X kəsilməz TK (2,4) intervalında müntəzəm paylanmışdır. D(2X−3)-i tapın.", opts: ["düzgün cavab yoxdur","4/3","1/4","2/3","1/3"], ans: 1 },
+  // 209 (q.283)
+  { text: "X kəsilməz TK (0,4) intervalında müntəzəm paylanmışdır. σ(X)-i tapın.", opts: ["2/√3","Düzgün cavab yoxdur","2","1/√3","√3"], ans: 0 },
+  // 210 (q.284)
+  { text: "X kəsilməz TK (2,6) intervalında müntəzəm paylanmışdır. M(MX)-i tapın.", opts: ["2","Düzgün cavab yoxdur","4","1","6"], ans: 2 },
+  // 211 (q.285)
+  { text: "X kəsilməz TK (a,b) intervalında müntəzəm paylanmışdır. σX-i tapın.", opts: ["(b−a)/(2√3)","(b−a)/2","(b+a)/√3","(b+a)/2","Düzgün cavab yoxdur"], ans: 0 },
+  // 212 (q.286)
+  { text: "X kəsilməz TK (a,b) intervalında müntəzəm paylanmışdır. DX-i tapın.", opts: ["(b+a)/2","(b−a)²/12","(b+a)/3","(b−a)/3","Düzgün cavab yoxdur"], ans: 1 },
+  // 213 (q.287)
+  { text: "X kəsilməz TK (a,b) intervalında müntəzəm paylanmışdır. MX-i tapın.", opts: ["(b+a)/2","Düzgün cavab yoxdur","b/2","(b−a)/2","a/2"], ans: 0 },
+  // 214 (q.288)
+  { text: "X kəsilməz TK-nin sıxlıq funksiyası f(x) = 3x², x∈[0,1]; 0 xolanlar. MX=0,75 olduqda DX-i tapın.", opts: ["3/4","3/80","Düzgün cavab yoxdur","4/3","1/80"], ans: 1 },
+  // 215 (q.289)
+  { text: "X kəsilməz TK-nin sıxlıq funksiyası f(x) = (2/9)(3x−x²), x∈[0,3]; 0 x∉[0,3] kimi verilmişdir. P(1<x<2) tapın.", opts: ["Düzgün cavab yoxdur","1/3","13/27","2/5","1/2"], ans: 2 },
+  // 216 (q.290)
+  { text: "X kəsilməz TK, F(x) = {0, x≤−2; 1/2+1/π·arcsin(x/2), −2<x≤2; 1, x>2} paylanma funksiyası ilə verilmişdir. f(x) sıxlıq funksiyasını tapın.", opts: ["1/π","düzgün cavab yoxdur","f = {0,x≤−2; 1/(π√(4−x²)),−2<x≤2; 1,x>2}","1/2","f = {0,x≤−2; 1/(π√(4−x²)),−2<x≤2; 0,x>2}"], ans: 4 },
+  // 217 (q.291)
+  { text: "X TK bütün ox üzrə F(x) = 1/2 + (1/π)·arctgx paylanma funksiyası ilə verilmişdir. f(x) sıxlıq funksiyasını tapın.", opts: ["1/(πx²)","1/(π(1+x²))","1/x²","Düzgün cavab yoxdur","1/π"], ans: 1 },
+  // 218 (q.292)
+  { text: "X TK bütün ox üzrə F(x) = 1/2+(1/π)·arctgx paylanma funksiyası ilə verilmişdir. P(0<x≤1) tapın.", opts: ["1/2","1/4","2/π","Düzgün cavab yoxdur","1/π"], ans: 1 },
+  // 219 (q.293)
+  { text: "X kəsilməz TK, F(x) = {0,x≤−1; (x+1)/4, −1<x≤3; 1, x>3} paylanma funksiyası ilə verilmişdir. P(x>3) tapın.", opts: ["1","1/4","1/2","düzgün cavab yoxdur","3/4"], ans: 0 },
+  // 220 (q.294)
+  { text: "X kəsilməz TK sıxlıq funksiyası ilə bütün ox üzrə f(x) = 2a/(1+x²) bərabərliyi ilə verilmişdir. Sabit a parametrini tapın.", opts: ["Düzgün cavab yoxdur","π","π/2","1/(2π)","2π"], ans: 3 },
+  // 221 (q.295)
+  { text: "X kəsilməz TK-nin paylanma funksiyası F(x) = {0, x≤0; x², 0<x≤1; 1, x>1} kimi verilmişdir. X kəmiyyətinin (0,25; 0,75) intervalında qiymət alması ehtimalını tapın.", opts: ["0,2","0,5","Düzgün cavab yoxdur","0,1","0,3"], ans: 1 },
+  // 222 (q.296)
+  { text: "X kəsilməz TK-nin sıxlıq funksiyası f(x) = 0,5·sin(x), 0≤x≤π; 0, x>π. F(x)-i tapın.", opts: ["düzgün cavab yoxdur","F(x)=0,5(1−cosx), 0<x≤π; 0, x>π","F(x)=1−cosx","F(x)=cosx","F(x)={0,x≤0; 0,5(1−cosx), 0<x≤π; 1, x>π}"], ans: 4 },
+  // 223 (q.297)
+  { text: "X kəsilməz TK-nin sıxlıq funksiyası f(x) = x/2, x∈[0;2]; 0 xolanlar. MX=4/3 olduqda DX-i tapın.", opts: ["3/16","5/16","4/3","2/9","16/23"], ans: 3 },
+  // 224 (q.298)
+  { text: "X TK bütün ox üzrə F(x) = 1/2+(1/π)·arctgx paylanma funksiyası ilə verilmişdir. P(0<x≤1) tapın.", opts: ["1/4","Düzgün cavab yoxdur","2/π","1/π","1/2"], ans: 0 },
+  // 225 (q.299)
+  { text: "X kəsilməz TK-nin paylanma funksiyası F(x) = {0, x≤0; x/2, 0<x≤2; 1, x>2} kimi verilmişdir. P(x≤1)-ni tapın.", opts: ["düzgün cavab yoxdur","0,5","1","0,2","0,1"], ans: 1 },
+  // 226 (q.300)
+  { text: "X kəsilməz TK-nin sıxlıq funksiyası f(x) = a·sin(x), x∈[0,π]; 0, x∉[0,π]. a-nı tapın.", opts: ["düzgün cavab yoxdur","0,5","0,2","0,1","0,3"], ans: 1 },
+  // 227 (q.301)
+  { text: "X kəsilməz TK, F(x) = {0, x≤1; (x−1)/2, 1<x≤3; 1, x>3} paylanma funksiyası ilə verilmişdir. P(2,5<x<3,5) tapın.", opts: ["1,5","düzgün cavab yoxdur","0,25","0,2","0,05"], ans: 2 },
+  // 228 (q.302)
+  { text: "X kəsilməz TK, F(x) = {0, x≤1; (x−1)/2, 1<x≤3; 1, x>3} paylanma funksiyası ilə verilmişdir. P(1,5<x<2,5) tapın.", opts: ["1","düzgün cavab yoxdur","0,5","1,5","2,5"], ans: 2 },
+  // 229 (q.303)
+  { text: "X kəsilməz TK, F(x) = {0, x<2; (x−2)², 2≤x≤3; 1, x>3} paylanma funksiyası ilə verilmişdir. P(2,5<x<3,5) tapın.", opts: ["düzgün cavab yoxdur","2,5","0,75","3,5","3"], ans: 2 },
+  // 230 (q.304)
+  { text: "X kəsilməz TK, F(x) = {0, x<2; (x−2)², 2≤x≤3; 1, x>3} paylanma funksiyası ilə verilmişdir. P(1<x<2,5) tapın.", opts: ["Düzgün cavab yoxdur","0,25","1","0,05","0,2"], ans: 1 },
+  // 231 (q.305)
+  { text: "MX=1,5 və f(x) = {1/3, x∈[0;3]; 0, x∉[0;3]} verilir. D(X+DX)-i tapmalı.", opts: ["0,75","düzgün cavab yoxdur","2","0,2","0,5"], ans: 0 },
+  // 232 (q.306)
+  { text: "MX=2/3 və f(x) = {2x, x∈[0;1]; 0, x∉[0;1]} sıxlıq funksiyası verilir. D(3X+MX)-i tapın.", opts: ["2","1/2","0,1","3","1/3"], ans: 1 },
+  // 233 (q.307)
+  { text: "MX=1 və f(x) = {0,25, x∈[−1;3]; 0, x∉[−1;3]} sıxlıq funksiyası verilir. D(3X+2)-i tapın.", opts: ["3/7","düzgün cavab yoxdur","12","10","7/3"], ans: 2 },
+  // 234 (q.308)
+  { text: "X TK-nin f(x) = {5x⁴, x∈[0;1]; 0, x∉[0;1]} sıxlıq funksiyası verilir. M(35MX²+6MX) riyazi gözləməsini tapın.", opts: ["25/36","1/6","6/5","5/6","30"], ans: 4 },
+  // 235 (q.309)
+  { text: "X kəsilməz TK-nin f(x) = {(2/9)x, x∈[0;3]; 0, x∉[0;3]} sıxlıq funksiyası verilir. MX=2 olduqda D(x/3−1)-i tapın.", opts: ["1/18","3","2","1/3","2/3"], ans: 0 },
+  // 236 (q.310)
+  { text: "X kəsilməz TK-nin riyazi gözləməsi M(X)=0,75-dir. Bu kəmiyyətin sıxlıq funksiyası f(x) = {3x², x∈[0;1]; 0, x∉[0;1]}. DX-i tapın.", opts: ["3/80","1","3","9/80","3/70"], ans: 0 },
+  // 237 (q.311)
+  { text: "X kəsilməz TK-nin f(x) = {1/2, x∈[1;3]; 0, x∉[1;3]} sıxlıq funksiyası verilir. M((3/13)X²−1) tapın.", opts: ["1/2","2","0","1","−1"], ans: 2 },
+  // 238 (q.312)
+  { text: "X kəsilməz TK-nin f(x) = {3x², x∈[0;1]; 0, x∉[0;1]} sıxlıq funksiyası verilir. M((5/3)X²+2)-i tapın.", opts: ["0","3","1/3","2","1/2"], ans: 1 },
+  // 239 (q.313)
+  { text: "X kəsilməz TK-nin f(x) = {1/4, x∈[−1;3]; 0, x∉[−1;3]} sıxlıq funksiyası verilir. M(X²−7/3)-i tapın.", opts: ["7","7/3","−7/3","0","3"], ans: 3 },
+  // 240 (q.314)
+  { text: "X kəsilməz TK-nin f(x) = {2x/9, x∈[0;3]; 0, x∉[0;3]} sıxlıq funksiyası verilir. M(X²+3)-ı tapın.", opts: ["2","15/2","6","5","4/9"], ans: 1 },
+  // 241 (q.315)
+  { text: "X kəsilməz TK-nin f(x) = {2x/9, x∈[0;3]; 0, x∉[0;3]} sıxlıq funksiyası verilir. M((1/2)MX−2M²X)-i tapın.", opts: ["2","0","−7","−2","1/2"], ans: 2 },
+  // 242 (q.316)
+  { text: "X kəsilməz TK-nin f(x) = {2x/9, x∈[0;3]; 0, x∉[0;3]} sıxlıq funksiyası verilir. M(3M²X−24)-i tapın.", opts: ["0","1","2","24","20"], ans: 0 },
+  // 243 (q.317)
+  { text: "X kəsilməz TK-nin f(x) = {x²/9, x∈[0;3]; 0, x∉[0;3]} sıxlıq funksiyası ilə verilmişdir. M((4/9)MX−1)-i tapın.", opts: ["0,1","−1","0","2","0,5"], ans: 2 },
+  // 244 (q.318)
+  { text: "X kəsilməz TK-nin f(x) = {x²/9, x∈[0;3]; 0, x∉[0;3]} sıxlıq funksiyası verilir. M((4/9)MX+1)-i tapın.", opts: ["1/2","2","3","2/3","4/9"], ans: 1 },
+  // 245 (q.319)
+  { text: "X kəsilməz TK-nin f(x) = {x²/9, x∈[0;3]; 0, x∉[0;3]} sıxlıq funksiyası verilir. M(4X+3)-i tapın.", opts: ["10","9","3","12","11"], ans: 3 },
+  // 246 (q.320)
+  { text: "X kəsilməz TK-nin f(x) = {7x⁶, x∈[0;1]; 0, x∉[0;1]} sıxlıq funksiyası verilir. M(64M²X−49)-i tapın.", opts: ["1/8","0","7/8","8/7","1/7"], ans: 1 },
+  // 247 (q.321)
+  { text: "X kəsilməz TK-nin f(x) = {6x⁵, x∈[0;1]; 0, x∉[0;1]} sıxlıq funksiyası verilir. M(7MX+3)-i tapın.", opts: ["7","9","7/6","6/7","6"], ans: 1 },
+  // 248 (q.322)
+  { text: "X TK-nin f(x) = {5x⁴, x∈[0;1]; 0, x∉[0;1]} sıxlıq funksiyası verilir. M(36M²X+6MX) riyazi gözləməsini tapın.", opts: ["1/6","6/5","5/6","25/36","30"], ans: 4 },
+  // 249 (q.323)
+  { text: "X kəsilməz TK-nin f(x) = {4x³, x∈[0;1]; 0, x∉[0;1]} sıxlıq funksiyası verilir. M(5MX+1)-i tapın.", opts: ["1/4","5","1","4/5","4"], ans: 1 },
+  // 250 (q.324)
+  { text: "X kəsilməz TK-nin f(x) = {3x², x∈[0;1]; 0, x∉[0;1]} sıxlıq funksiyası verilir. M(2X+1)-i tapın.", opts: ["1","5/2","1/2","1/5","2"], ans: 1 },
+  // 251 (q.325)
+  { text: "X kəsilməz TK-nin f(x) = {2x, x∈[0;1]; 0, x∉[0;1]} sıxlıq funksiyası verilir. MX-i tapın.", opts: ["2/3","düzgün cavab yoxdur","2","3/2","1/3"], ans: 0 },
+  // 252 (q.326)
+  { text: "Paylanma funksiyasının xassəsi deyil:", opts: ["lim F(x)=0 (x→−∞) və lim F(x)=1 (x→+∞)","azalmayan funksiyadır","doğru cavab yoxdur","azalan funksiyadır","0≤F(x)≤1"], ans: 3 },
+  // 253 (q.327)
+  { text: "Sıxlıq funksiyası həmin intervalda sabit f(x)=1/(b−a) qiymətini, bu intervalın xaricindəisə f(x)=0 qiymətini alırsa, onda X kəsilməz TK-yə (a,b) intervalında ................paylanmış TK deyilir.", opts: ["normal","müntəzəm","doğru cavab yoxdur.","binomial","üstlü"], ans: 1 },
+  // 254 (q.328)
+  { text: "X kəsilməz TK (0;1) intervalında f(x)=3x² sıxlıq funksiyası ilə verilmişdir; bu interval xaricində f(x)=0. X TK-nin dispersiyasını tapın.", opts: ["3/80","2","4/3","2/3","Düzgün cavab yoxdur"], ans: 0 },
+  // 255 (q.329)
+  { text: "X kəsilməz TK-nin paylanma funksiyası F(x) = {0, x≤1; 0.6, 1<x≤2; 0.8, 2<x≤4; 1, x>4} olarsa, P(X≥3)-ü hesablayın.", opts: ["1","0,3","0,2","0,8","düzgün cavab yoxdur"], ans: 2 },
+  // 256 (q.330)
+  { text: "(23,57) intervalında müntəzəm paylanmış X TK-nin riyazi gözləməsini tapın.", opts: ["30","40","16","17","düzgün cavab yoxdur"], ans: 1 },
+  // 257 (q.331)
+  { text: "X kəsilməz TK (0;20) intervalında f(x)=(1/200)x sıxlıq funksiyası ilə verilmişdir; bu interval xaricində f(x)=0. X TK-nin riyazi gözləməsini tapın.", opts: ["40/3","20","doğru cavab yoxdur","20/3","40/9"], ans: 0 },
+  // 258 (q.332)
+  { text: "X kəsilməz TK (0;2) intervalında f(x)=(1/2)x sıxlıq funksiyası ilə verilmişdir; bu interval xaricində f(x)=0. X TK-nin dispersiyasını tapın.", opts: ["4/3","doğru cavab yoxdur","2","2/3","2/9"], ans: 4 },
+  // 259 (q.333)
+  { text: "(20,80) intervalında müntəzəm paylanmış X TK-nin riyazi gözlləmə və dispersiyasının cəmini tapın.", opts: ["350","50","360","doğru cavab yoxdur","300"], ans: 0 },
+  // 260
+  { text: "Aşağıdakılardan hansı diskret paylanmaya aiddir?", opts: ["Üstlü paylanma","düzgün cavab yoxdur","Normal paylanma","Binomial paylanma","Müntəzəm"], ans: 3 },
+  // 261
+  { text: "Normal paylanmada sıxlıq funksiyasının qrafiki hansı adla tanınır?", opts: ["Lorentz əyrisi","Qaus əyrisi","Binom əyrisi","Poisson əyrisi","Laplace əyrisi"], ans: 1 },
+  // 262
+  { text: "P(A) = 0,5, P(B) = 0,5, P(AB) = 0,25. P(A|B) = ?", opts: ["0,25","0,5","0,75","1","düzgün cavab yoxdur"], ans: 1 },
+  // 263
+  { text: "Bayes düsturu: P(Hᵢ|A) = ?", opts: ["P(Hᵢ)·P(A|Hᵢ)/P(A)","P(A)·P(Hᵢ)/P(A|Hᵢ)","P(A|Hᵢ)/P(Hᵢ)","P(A)/P(Hᵢ|A)","düzgün cavab yoxdur"], ans: 0 },
+  // 264
+  { text: "5 ağ, 3 qara kürəli qabdan ardıcıl olaraq 2 kürə çəkilir (geri qoyulmadan). Hər ikisinin ağ olması ehtimalı?", opts: ["20/56","5/14","5/8","10/28","düzgün cavab yoxdur"], ans: 1 },
+  // 265
+  { text: "n = 6, p = 0,5 Bernulli sınaqları üçün P₆(3) = ?", opts: ["5/16","3/16","5/8","15/64","20/64"], ans: 3 },
+  // 266
+  { text: "λ=2 olan Puasson paylanması üçün P(X=0) = ?", opts: ["e⁻²","2e⁻²","4e⁻²","1","düzgün cavab yoxdur"], ans: 0 },
+  // 267
+  { text: "λ=2 olan Puasson paylanması üçün P(X=2) = ?", opts: ["2e⁻²","e⁻²","4e⁻²/2","4e⁻²","e²"], ans: 2 },
+  // 268
+  { text: "X ~ N(0,1) olarsa P(−1 < X < 1) ≈ ?", opts: ["0,5","0,68","0,95","0,997","düzgün cavab yoxdur"], ans: 1 },
+  // 269
+  { text: "X kəsilməz TK üçün P(X = c) = ? (c sabit qiymət)", opts: ["f(c)","F(c)","0","1","düzgün cavab yoxdur"], ans: 2 },
+  // 270
+  { text: "Üstlü paylanmada P(X > t) = ? (t ≥ 0)", opts: ["e^(−λt)","1−e^(−λt)","λe^(−λt)","e^(λt)","düzgün cavab yoxdur"], ans: 0 },
+  // 271
+  { text: "X ~ Exp(λ), λ=0,5 olarsa MX = ?", opts: ["0,5","1","2","4","düzgün cavab yoxdur"], ans: 2 },
+  // 272
+  { text: "X ~ Uniform(0,6) olarsa DX = ?", opts: ["3","6","9","18","3/2"], ans: 3 },
+  // 273 — Chebyshev
+  { text: "Çebışev bərabərsizliyi: P(|X−MX| < ε) ≥ ?", opts: ["DX/ε²","1−DX/ε²","DX/ε","1−DX/ε","düzgün cavab yoxdur"], ans: 1 },
+  // 274
+  { text: "M(aX + b) = ? (a,b sabitdir)", opts: ["aM(X)","aM(X)+b","bM(X)+a","a+b","düzgün cavab yoxdur"], ans: 1 },
+  // 275
+  { text: "D(aX + b) = ?", opts: ["aD(X)+b","a²D(X)+b","a²D(X)","aD(X)","düzgün cavab yoxdur"], ans: 2 },
+  // 276
+  { text: "Şərti dispersiya D(X|Y=y) = ?", opts: ["M(X|y)","M(X²|y)−[M(X|y)]²","D(X)","D(Y)","düzgün cavab yoxdur"], ans: 1 },
+  // 277
+  { text: "Korrelyasiya əmsalı r = 0 nə bildirir?", opts: ["Güclü korrelyasiya","Tam korrelyasiya","Sıfır xətti korrelyasiya","Mənfi korrelyasiya","düzgün cavab yoxdur"], ans: 2 },
+  // 278
+  { text: "Tam korrelyasiyada r = ?", opts: ["0","0,5","±1","−0,5","düzgün cavab yoxdur"], ans: 2 },
+  // 279
+  { text: "Regresiya düz xəttinin tənliyi y = bx + a formulu. b-nin adı nədir?", opts: ["Korrelyasiya əmsalı","Regresiya əmsalı","Dispersiya","Kovariasiya","düzgün cavab yoxdur"], ans: 1 },
+  // 280
+  { text: "X ~ Poisson(3) olduqda P(X=1) = ?", opts: ["3e⁻³","e⁻³","9e⁻³/2","3e³","düzgün cavab yoxdur"], ans: 0 },
+  // 281
+  { text: "Bir ədəd zər 4 dəfə atılır. 3 çıxması 0 dəfə baş verməsi ehtimalı?", opts: ["(5/6)⁴","(1/6)⁴","4·(1/6)·(5/6)³","C(4,1)·(1/6)·(5/6)³","düzgün cavab yoxdur"], ans: 0 },
+  // 282
+  { text: "3 asılı olmayan sınaqda P(A)=0,2, P(B)=0,3, P(C)=0,5. P(A∩B∩C) = ?", opts: ["0,03","0,06","0,1","0,12","düzgün cavab yoxdur"], ans: 0 },
+  // 283
+  { text: "P(Ā∩B̄) nəyə bərabərdir (birgə olmayan A,B üçün)?", opts: ["1−P(A)−P(B)","P(A)+P(B)","1−P(A)+P(B)","P(Ā)·P(B̄)","düzgün cavab yoxdur"], ans: 3 },
+  // 284
+  { text: "n=100, p=0,1 üçün Puasson yaxınlaşmasında λ = ?", opts: ["0,1","1","10","100","düzgün cavab yoxdur"], ans: 2 },
+  // 285 — C(8,3)
+  { text: "C(8,3) = ?", opts: ["56","24","336","28","düzgün cavab yoxdur"], ans: 0 },
+  // 286
+  { text: "Diskret TK X = {0,1,2,3}, bərabər ehtimallıdırsa (p=0,25 hər biri), M(X) = ?", opts: ["0,5","1","1,5","2","düzgün cavab yoxdur"], ans: 2 },
+  // 287
+  { text: "X ~ Uniform(a,b) paylanmasında median hansı qiymət alır?", opts: ["a","b","(a+b)/2","(b−a)/2","düzgün cavab yoxdur"], ans: 2 },
+  // 288
+  { text: "Bernulli sınaqında p+q = ?", opts: ["0","2","1","p","q"], ans: 2 },
+  // 289
+  { text: "Çevirilmiş (əks) hadisə Ā-nın ehtimalı P(Ā) = 1 − P(A). Bu xassə adlanır:", opts: ["Toplama qanunu","Əlavə qanunu","Çoxlaşdırma qanunu","Şərti ehtimal","düzgün cavab yoxdur"], ans: 1 },
+  // 290
+  { text: "İki sikkə atılır. Hər ikisinin eyni tərəfi çıxması ehtimalı?", opts: ["1/4","1/2","3/4","1","düzgün cavab yoxdur"], ans: 1 },
+  // 291
+  { text: "X ~ N(5, 4) olarsa σ(X) = ?", opts: ["4","2","5","1","düzgün cavab yoxdur"], ans: 1 },
+  // 292
+  { text: "Böyük ədədlər qanununun (Çebışev forması) əsas şərti nədir?", opts: ["n→∞","p=0,5","X normal paylanmış olmalı","Hadisələr asılı olmalı","düzgün cavab yoxdur"], ans: 0 },
+  // 293
+  { text: "DX=0 nə deməkdir?", opts: ["X hər zaman MX-ə bərabərdir","X neqativ deyil","X normal paylanıb","X sabitdir","düzgün cavab yoxdur"], ans: 3 },
+  // 294
+  { text: "X ~ Exp(2) olarsa DX = ?", opts: ["2","4","0,5","1/4","düzgün cavab yoxdur"], ans: 3 },
+  // 295
+  { text: "Diskret X TK: x₁=0 (p₁=0,4), x₂=1 (p₂=0,6). D(X) = ?", opts: ["0,24","0,6","0,4","0,16","düzgün cavab yoxdur"], ans: 0 },
+  // 296
+  { text: "M(X²) = DX + [MX]² — bu düstur doğrudurmu?", opts: ["Bəli","Xeyr","Yalnız normal paylanma üçün","Yalnız diskret üçün","düzgün cavab yoxdur"], ans: 0 },
+  // 297
+  { text: "Kəsilməz TK üçün P(a < X ≤ b) = F(b) − F(a). Bu düstur doğrudurmu?", opts: ["Bəli","Xeyr","Yalnız normal paylanma üçün","Yalnız müntəzəm paylanma üçün","düzgün cavab yoxdur"], ans: 0 },
+  // 298
+  { text: "10 kartın 4-ü qırmızıdır. 3 kart çəkilir. Hamısının qırmızı olma ehtimalı?", opts: ["C(4,3)/C(10,3)","4/10·3/9·2/8","4³/10³","1/10","düzgün cavab yoxdur"], ans: 0 },
+  // 299
+  { text: "X ~ Binomial(n=4, p=0,5) olarsa P(X=2) = ?", opts: ["3/8","3/16","6/16","1/4","düzgün cavab yoxdur"], ans: 2 },
+  // 300
+  { text: "X ~ Poisson(λ=5) olarsa DX = ?", opts: ["5","25","1/5","√5","düzgün cavab yoxdur"], ans: 0 },
+  // 301
+  { text: "Klassik ehtimal tərifi üçün hansı şərt lazımdır?", opts: ["Hadisələr eyniimkanlı olmalı","n → ∞ olmalı","p = 0,5 olmalı","Normal paylanma olmalı","düzgün cavab yoxdur"], ans: 0 },
+  // 302
+  { text: "P(A+B) = P(A) + P(B) − P(AB). Bu düstur neçə qanunudur?", opts: ["Toplama qanunu","Çoxlaşdırma qanunu","Əlavə qanunu","Şərti ehtimal qanunu","düzgün cavab yoxdur"], ans: 0 },
+  // 303
+  { text: "Şərti ehtimal P(A|B) = P(A), bu nə deməkdir?", opts: ["A baş vermib","B baş vermib","A və B asılı olmayandır","A ⊂ B","düzgün cavab yoxdur"], ans: 2 },
+  // 304
+  { text: "5 nəfərdən 3-nü ardıcıl seçmənin neçə üsulu var (yerləşdirmə)?", opts: ["60","10","20","30","düzgün cavab yoxdur"], ans: 0 },
+  // 305
+  { text: "Bir dəfə atılan sikkədə yazı çıxması ehtimalı p = 0,5. n = 100 sınaqda yazının ən böyük ehtimallı sayı?", opts: ["49","50","51","49 və 51","49 və 50 ya 50 və 51"], ans: 1 },
+  // 306
+  { text: "Diskret X TK: x=-1(p=0,3), x=0(p=0,5), x=1(p=0,2). MX = ?", opts: ["0","−0,1","0,1","0,5","düzgün cavab yoxdur"], ans: 1 },
+  // 307
+  { text: "Sıxlıq funksiyası f(x) ≥ 0 bütün x üçün. Bu şərt nə üçün tələb olunur?", opts: ["Ehtimal mənfi ola bilməz","Paylanma funksiyası artmalıdır","Normal paylanma tərifi","Dispersiya müsbət olmalı","düzgün cavab yoxdur"], ans: 0 },
+  // 308
+  { text: "X ~ N(a, σ²). P(X < a) = ?", opts: ["0,5","1","0","0,68","düzgün cavab yoxdur"], ans: 0 },
+  // 309
+  { text: "n=50, p=0,4 Bernulli sınaqında standart kənarlaşma σ = √(npq) = ?", opts: ["√12","√20","√10","√8","düzgün cavab yoxdur"], ans: 0 },
+  // 310
+  { text: "Diskret TK-nin paylanma funksiyası F(x) sağdan süreklidir. Bu doğrudurmu?", opts: ["Bəli","Xeyr","Yalnız kəsilməz TK üçün","Yalnız diskret üçün","düzgün cavab yoxdur"], ans: 0 },
+  // 311
+  { text: "Tam ehtimal düsturu Σ P(Hᵢ) = 1 tələb edir. Bu nədir?", opts: ["Hipotezlər tam qrupu","Hadisənin tamamlayıcısı","Bayes şərti","Bernulli şərti","düzgün cavab yoxdur"], ans: 0 },
+  // 312
+  { text: "Müntəzəm paylanmada P(α<X<β) = (β−α)/(b−a). Bu doğrudurmu? (a≤α<β≤b)", opts: ["Bəli","Xeyr","Yalnız simmetrik üçün","Yalnız b−a=1 üçün","düzgün cavab yoxdur"], ans: 0 },
+  // 313 (son)
+  { text: "X ~ Exp(λ). Yaddaşsızlıq xassəsi: P(X>s+t|X>s) = P(X>t). Bu xassə hansı paylanmaya aiddir?", opts: ["Normal paylanma","Binomial paylanma","Eksponensial paylanma","Müntəzəm paylanma","düzgün cavab yoxdur"], ans: 2 },
+];
+
+// ─────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────
+let selectedQuestions = [];
+let currentIndex = 0;
+let userAnswers = [];
+let timer = null;
+let timeLeft = 30 * 60;
+let quizAnswered = false;
+
+const LABELS = ['A','B','C','D','E'];
+
+// ─────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i>0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function pick30() {
+  const indices = Array.from({length: ALL_QUESTIONS.length}, (_,i)=>i);
+  return shuffle(indices).slice(0,30).map(i => ALL_QUESTIONS[i]);
+}
+
+function renderMath(el) {
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise([el]).catch(()=>{});
+  }
+}
+
+function formatTime(sec) {
+  const m = Math.floor(sec/60).toString().padStart(2,'0');
+  const s = (sec%60).toString().padStart(2,'0');
+  return `${m}:${s}`;
+}
+
+function formatQuestion(text) {
+  // Convert table markdown to HTML
+  let html = text;
+
+  // Convert | table | rows
+  const lines = html.split('\n');
+  let inTable = false;
+  const result = [];
+  let tableRows = [];
+
+  for (const line of lines) {
+    if (line.trim().startsWith('|')) {
+      if (!inTable) { inTable = true; tableRows = []; }
+      const cells = line.split('|').filter(c => c.trim() !== '');
+      tableRows.push(cells);
+    } else {
+      if (inTable) {
+        result.push(buildTable(tableRows));
+        inTable = false;
+        tableRows = [];
+      }
+      result.push(line);
+    }
+  }
+  if (inTable && tableRows.length) result.push(buildTable(tableRows));
+
+  html = result.join('\n');
+
+  // Convert newlines to <br>
+  html = html.replace(/\n/g, '<br>');
+
+  // Wrap math in display/inline
+  html = html.replace(/\$\$(.+?)\$\$/gs, '<div class="formula-box">\\[$1\\]</div>');
+  html = html.replace(/\$(.+?)\$/g, '\\($1\\)');
+
+  return html;
+}
+
+function buildTable(rows) {
+  let html = '<div class="q-table-wrap"><table class="q-table">';
+  rows.forEach((row, ri) => {
+    const tag = ri === 0 ? 'th' : 'td';
+    html += '<tr>' + row.map(c => `<${tag}>${c.trim()}</${tag}>`).join('') + '</tr>';
+  });
+  html += '</table></div>';
+  return html;
+}
+
+// ─────────────────────────────────────────
+// QUIZ LOGIC
+// ─────────────────────────────────────────
+function startQuiz() {
+  selectedQuestions = pick30();
+  userAnswers = new Array(30).fill(null);
+  currentIndex = 0;
+  timeLeft = 30 * 60;
+
+  document.getElementById('intro').style.display = 'none';
+  document.getElementById('quiz').style.display = 'block';
+  document.getElementById('qTotal').textContent = selectedQuestions.length;
+
+  // Build bottom nav dots
+  const navInner = document.getElementById('qNavInner');
+  navInner.innerHTML = '';
+  for (let i = 0; i < 30; i++) {
+    const dot = document.createElement('button');
+    dot.className = 'q-dot';
+    dot.textContent = i + 1;
+    dot.id = 'qdot-' + i;
+    dot.onclick = (function(idx){ return function(){ jumpToQuestion(idx); }; })(i);
+    navInner.appendChild(dot);
+  }
+  document.getElementById('qNavBar').style.display = 'block';
+
+  startTimer();
+  showQuestion(0);
+}
+
+function startTimer() {
+  updateTimerDisplay();
+  timer = setInterval(() => {
+    timeLeft--;
+    updateTimerDisplay();
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      finishQuiz();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const el = document.getElementById('timerDisplay');
+  const badge = document.getElementById('timerBadge');
+  el.textContent = formatTime(timeLeft);
+  if (timeLeft <= 5*60) badge.classList.add('urgent');
+  else badge.classList.remove('urgent');
+}
+
+function showQuestion(idx) {
+  const q = selectedQuestions[idx];
+  const alreadyAnswered = userAnswers[idx] !== null;
+  quizAnswered = alreadyAnswered;
+
+  document.getElementById('qNum').textContent = idx + 1;
+  document.getElementById('qLabel').textContent = `SUAL ${idx + 1}`;
+  document.getElementById('progressFill').style.width = `${(idx/30)*100}%`;
+
+  const qText = document.getElementById('questionText');
+  qText.innerHTML = formatQuestion(q.text);
+  renderMath(qText);
+
+  const grid = document.getElementById('optionsGrid');
+  grid.innerHTML = '';
+
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="opt-label">${LABELS[i]}</span><span class="opt-text">${formatQuestion(opt)}</span>`;
+    if (!alreadyAnswered) {
+      btn.onclick = () => selectAnswer(i);
+    } else {
+      btn.disabled = true;
+    }
+    grid.appendChild(btn);
+    renderMath(btn);
+  });
+
+  const fb = document.getElementById('feedbackArea');
+  const nextBtn = document.getElementById('nextBtn');
+  const prevBtn = document.getElementById('prevBtn');
+
+  if (alreadyAnswered) {
+    const userAns = userAnswers[idx];
+    const correct = q.ans;
+    const btns = document.querySelectorAll('.option-btn');
+    btns[correct].classList.add('correct');
+    if (userAns !== correct) btns[userAns].classList.add('wrong');
+
+    if (userAns === correct) {
+      fb.innerHTML = `<div class="feedback-row correct-fb">✓ Düzgün cavab!</div>`;
+    } else {
+      fb.innerHTML = `<div class="feedback-row wrong-fb">✗ Səhv cavab. Düzgün cavab: <strong>${LABELS[correct]}</strong></div>`;
+    }
+    nextBtn.style.display = 'block';
+    nextBtn.textContent = idx < 29 ? 'Növbəti sual →' : 'Nəticəyə bax →';
+  } else {
+    fb.innerHTML = '';
+    nextBtn.style.display = 'none';
+  }
+
+  // Prev button visibility
+  if (idx > 0) {
+    prevBtn.classList.add('visible');
+  } else {
+    prevBtn.classList.remove('visible');
+  }
+
+  // Update nav bar
+  updateNavBar(idx);
+
+  // Scroll to top of question
+  document.getElementById('questionCard').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function selectAnswer(optIdx) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+
+  const q = selectedQuestions[currentIndex];
+  const correct = q.ans;
+  userAnswers[currentIndex] = optIdx;
+
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach(b => b.disabled = true);
+
+  // Mark correct and wrong
+  btns[correct].classList.add('correct');
+  if (optIdx !== correct) {
+    btns[optIdx].classList.add('wrong');
+  }
+
+  // Feedback
+  const fb = document.getElementById('feedbackArea');
+  if (optIdx === correct) {
+    fb.innerHTML = `<div class="feedback-row correct-fb">✓ Düzgün cavab!</div>`;
+  } else {
+    fb.innerHTML = `<div class="feedback-row wrong-fb">✗ Səhv cavab. Düzgün cavab: <strong>${LABELS[correct]}</strong></div>`;
+  }
+
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.style.display = 'block';
+  nextBtn.textContent = currentIndex < 29 ? 'Növbəti sual →' : 'Nəticəyə bax →';
+
+  // Update nav dot
+  updateNavBar(currentIndex);
+}
+
+function nextQuestion() {
+  currentIndex++;
+  if (currentIndex >= 30) {
+    finishQuiz();
+  } else {
+    showQuestion(currentIndex);
+  }
+}
+
+function prevQuestion() {
+  if (currentIndex > 0) {
+    currentIndex--;
+    showQuestion(currentIndex);
+  }
+}
+
+function jumpToQuestion(idx) {
+  currentIndex = idx;
+  showQuestion(idx);
+}
+
+function updateNavBar(activeIdx) {
+  for (let i = 0; i < 30; i++) {
+    const dot = document.getElementById('qdot-' + i);
+    if (!dot) continue;
+    dot.className = 'q-dot';
+    if (i === activeIdx) dot.classList.add('current');
+    if (userAnswers[i] !== null) {
+      if (userAnswers[i] === selectedQuestions[i].ans) {
+        dot.classList.add('ans-correct');
+      } else {
+        dot.classList.add('ans-wrong');
+      }
+    }
+  }
+  // Scroll active dot into view
+  const activeDot = document.getElementById('qdot-' + activeIdx);
+  if (activeDot) activeDot.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
+}
+
+// ─────────────────────────────────────────
+// RESULTS
+// ─────────────────────────────────────────
+function finishQuiz() {
+  clearInterval(timer);
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('qNavBar').style.display = 'none';
+  document.getElementById('results').style.display = 'block';
+
+  let correct = 0;
+  userAnswers.forEach((ans, i) => {
+    if (ans === selectedQuestions[i].ans) correct++;
+  });
+  const total = 30;
+  const wrong = total - correct;
+  const pct = Math.round((correct/total)*100);
+
+  // Score ring
+  const circumference = 477.5;
+  const offset = circumference - (pct/100)*circumference;
+  const ring = document.getElementById('ringFill');
+  const color = pct >= 70 ? '#22c55e' : pct >= 40 ? '#f5c842' : '#ef4444';
+  ring.setAttribute('stroke', color);
+  setTimeout(() => { ring.style.strokeDashoffset = offset; }, 200);
+
+  document.getElementById('scorePct').textContent = pct + '%';
+  document.getElementById('scorePct').style.color = color;
+
+  // Title
+  let title, sub;
+  if (pct >= 90) { title = 'Əla! 🎉'; sub = 'Mükəmməl nəticə! Riyaziyyat üstadısınız!'; }
+  else if (pct >= 70) { title = 'Yaxşı! 👍'; sub = 'Yaxşı bilik nümayiş etdirdiniz.'; }
+  else if (pct >= 50) { title = 'Orta 📚'; sub = 'Bir az daha çalışmaq lazımdır.'; }
+  else { title = 'Zəif 💪'; sub = 'Narahat olmayın, daha çox məşq edin!'; }
+
+  document.getElementById('resultTitle').textContent = title;
+  document.getElementById('resultSub').textContent = sub;
+  document.getElementById('correctCount').textContent = correct;
+  document.getElementById('wrongCount').textContent = wrong;
+  document.getElementById('totalCount').textContent = total;
+
+  buildReview();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function buildReview() {
+  const list = document.getElementById('reviewList');
+  list.innerHTML = '';
+
+  selectedQuestions.forEach((q, i) => {
+    const userAns = userAnswers[i];
+    const isCorrect = userAns === q.ans;
+    const card = document.createElement('div');
+    card.className = `review-card ${isCorrect ? 'rc-correct' : 'rc-wrong'}`;
+    card.dataset.result = isCorrect ? 'correct' : 'wrong';
+    card.dataset.idx = i;
+
+    let answersHtml = '';
+    q.opts.forEach((opt, oi) => {
+      let cls = '';
+      let icon = '';
+      if (oi === q.ans && oi === userAns) { cls = 'user-correct'; icon = '✓'; }
+      else if (oi === userAns && oi !== q.ans) { cls = 'user-wrong'; icon = '✗'; }
+      else if (oi === q.ans) { cls = 'show-correct'; icon = '→'; }
+      if (cls) {
+        answersHtml += `<div class="rc-answer ${cls}">
+          <span class="rc-icon">${icon}</span>
+          <span><strong>${LABELS[oi]})</strong> ${opt}</span>
+        </div>`;
+      }
+    });
+
+    card.innerHTML = `
+      <div class="rc-meta">
+        <span class="rc-badge ${isCorrect?'correct':'wrong'}">${isCorrect?'✓ Düzgün':'✗ Səhv'}</span>
+        <span class="rc-qnum">Sual ${i+1}</span>
+      </div>
+      <div class="rc-question">${formatQuestion(q.text)}</div>
+      <div class="rc-answers">${answersHtml}</div>
+    `;
+
+    // Render math in card
+    setTimeout(() => renderMath(card), 0);
+    list.appendChild(card);
+  });
+}
+
+function filterReview(type, btn) {
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+
+  document.querySelectorAll('.review-card').forEach(card => {
+    if (type === 'all') card.style.display = '';
+    else if (type === 'correct') card.style.display = card.dataset.result === 'correct' ? '' : 'none';
+    else if (type === 'wrong') card.style.display = card.dataset.result === 'wrong' ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>
