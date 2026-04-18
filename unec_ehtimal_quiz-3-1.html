@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UNEC · Ehtimal Nəzəriyyəsi</title>
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(','\\)'],['$','$']], displayMath: [['$$','$$']] },
+  options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #070b14;
+  --surface: #0f1624;
+  --card: #141d2e;
+  --border: #1e2d47;
+  --gold: #c9a227;
+  --gold2: #e8c252;
+  --text: #e8edf5;
+  --muted: #6b7a94;
+  --correct: #1a7a4a;
+  --correct-bg: #0d3d24;
+  --correct-border: #22c55e;
+  --wrong: #7a1a1a;
+  --wrong-bg: #3d0d0d;
+  --wrong-border: #ef4444;
+  --accent: #2563eb;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  line-height: 1.65;
+  min-height: 100vh;
+}
+
+/* ── SPLASH ── */
+#splash {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(201,162,39,.18) 0%, transparent 70%),
+    var(--bg);
+}
+.splash-inner {
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+}
+.logo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  background: rgba(201,162,39,.12);
+  border: 1px solid rgba(201,162,39,.3);
+  border-radius: 999px;
+  padding: .35rem 1rem;
+  font-size: .78rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--gold2);
+  margin-bottom: 2rem;
+}
+.logo-badge svg { width: 14px; height: 14px; }
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 6vw, 3.2rem);
+  line-height: 1.15;
+  color: #fff;
+  margin-bottom: 1rem;
+}
+h1 span { color: var(--gold); font-style: italic; }
+.subtitle {
+  color: var(--muted);
+  font-size: .95rem;
+  margin-bottom: 2.5rem;
+}
+.stats-row {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+}
+.stat {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: .8rem 1.4rem;
+  text-align: center;
+  min-width: 110px;
+}
+.stat-num {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--gold);
+  font-family: 'Playfair Display', serif;
+}
+.stat-label { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-top: .1rem; }
+.btn-start {
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  background: var(--gold);
+  color: #07090f;
+  font-weight: 700;
+  font-size: 1rem;
+  padding: .9rem 2.4rem;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: all .2s;
+  letter-spacing: .02em;
+}
+.btn-start:hover { background: var(--gold2); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(201,162,39,.35); }
+.btn-start svg { width: 18px; height: 18px; }
+
+/* ── QUIZ ── */
+#quiz { display: none; min-height: 100vh; padding: 0; }
+
+.quiz-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(7,11,20,.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: .75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.header-brand {
+  font-family: 'Playfair Display', serif;
+  font-size: .95rem;
+  color: var(--gold);
+  white-space: nowrap;
+}
+.progress-wrap { flex: 1; max-width: 320px; }
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: .72rem;
+  color: var(--muted);
+  margin-bottom: .35rem;
+}
+.progress-bar {
+  height: 5px;
+  background: var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--gold2));
+  border-radius: 999px;
+  transition: width .4s ease;
+  width: 0%;
+}
+.timer-box {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: .4rem .9rem;
+  font-size: .9rem;
+  font-weight: 600;
+  min-width: 80px;
+  justify-content: center;
+}
+.timer-box.warning { border-color: var(--gold); color: var(--gold); }
+.timer-box.danger { border-color: var(--wrong-border); color: var(--wrong-border); animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+
+/* Question area */
+.quiz-body { max-width: 820px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+
+.q-num {
+  font-size: .78rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: .6rem;
+}
+.q-text {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--text);
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+.options { display: flex; flex-direction: column; gap: .65rem; }
+.option-btn {
+  width: 100%;
+  text-align: left;
+  padding: 1rem 1.3rem;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: .95rem;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  gap: .9rem;
+  transition: all .18s;
+  position: relative;
+  line-height: 1.55;
+}
+.option-btn:hover:not(:disabled) {
+  border-color: var(--gold);
+  background: rgba(201,162,39,.06);
+}
+.opt-letter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: var(--border);
+  color: var(--muted);
+  font-size: .78rem;
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-top: .05rem;
+  transition: all .18s;
+}
+.option-btn:hover:not(:disabled) .opt-letter {
+  background: var(--gold);
+  color: #07090f;
+}
+.option-btn.correct {
+  background: var(--correct-bg);
+  border-color: var(--correct-border);
+}
+.option-btn.correct .opt-letter { background: var(--correct-border); color: #fff; }
+.option-btn.wrong {
+  background: var(--wrong-bg);
+  border-color: var(--wrong-border);
+}
+.option-btn.wrong .opt-letter { background: var(--wrong-border); color: #fff; }
+.option-btn.show-correct {
+  background: var(--correct-bg);
+  border-color: var(--correct-border);
+  opacity: .7;
+}
+.option-btn:disabled { cursor: default; }
+
+.feedback-icon {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: 1.1rem;
+  padding-left: .5rem;
+}
+
+/* nav */
+.q-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2.5rem;
+}
+.btn-nav {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .65rem 1.4rem;
+  border-radius: 9px;
+  font-size: .9rem;
+  font-weight: 500;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: all .18s;
+}
+.btn-nav:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
+.btn-nav:disabled { opacity: .3; cursor: default; }
+.btn-finish {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #07090f;
+  font-weight: 700;
+}
+.btn-finish:hover:not(:disabled) { background: var(--gold2); border-color: var(--gold2); color: #07090f; }
+
+/* dot map */
+.dot-map {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  background: var(--border);
+  cursor: pointer;
+  transition: all .18s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .65rem;
+  color: var(--muted);
+}
+.dot:hover { background: var(--gold); color: #07090f; }
+.dot.active { background: var(--gold); color: #07090f; font-weight: 700; }
+.dot.answered-c { background: var(--correct-bg); border: 1px solid var(--correct-border); color: var(--correct-border); }
+.dot.answered-w { background: var(--wrong-bg); border: 1px solid var(--wrong-border); color: var(--wrong-border); }
+
+/* ── RESULTS ── */
+#results { display: none; min-height: 100vh; padding: 2rem 1.5rem; }
+.results-inner { max-width: 820px; margin: 0 auto; }
+.score-hero {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  margin-bottom: 2.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.score-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(201,162,39,.1) 0%, transparent 70%);
+}
+.score-ring {
+  width: 130px;
+  height: 130px;
+  margin: 0 auto 1.5rem;
+  position: relative;
+}
+.score-ring svg { transform: rotate(-90deg); }
+.ring-bg { fill: none; stroke: var(--border); stroke-width: 10; }
+.ring-fg { fill: none; stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1); }
+.score-pct {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.score-pct-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.score-pct-label { font-size: .7rem; color: var(--muted); margin-top: .2rem; }
+.result-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.7rem;
+  margin-bottom: .5rem;
+}
+.result-sub { color: var(--muted); font-size: .9rem; }
+.score-stats {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+.ss { text-align: center; }
+.ss-num { font-size: 1.5rem; font-weight: 700; }
+.ss-label { font-size: .72rem; color: var(--muted); }
+.btn-retry {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  margin-top: 1.5rem;
+  padding: .75rem 2rem;
+  background: transparent;
+  border: 1.5px solid var(--gold);
+  color: var(--gold);
+  border-radius: 9px;
+  font-size: .9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+}
+.btn-retry:hover { background: var(--gold); color: #07090f; }
+
+/* Review */
+.review-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  color: var(--text);
+}
+.review-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.2rem 1.4rem;
+  margin-bottom: 1rem;
+  transition: border-color .2s;
+}
+.review-item.rc { border-color: var(--correct-border); }
+.review-item.rw { border-color: var(--wrong-border); }
+.review-header {
+  display: flex;
+  align-items: flex-start;
+  gap: .8rem;
+  margin-bottom: .8rem;
+}
+.review-badge {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .8rem;
+  margin-top: .1rem;
+}
+.rc .review-badge { background: var(--correct-border); color: #fff; }
+.rw .review-badge { background: var(--wrong-border); color: #fff; }
+.review-q { font-size: .92rem; line-height: 1.6; }
+.review-answers { display: flex; flex-direction: column; gap: .4rem; margin-top: .6rem; }
+.rev-opt {
+  font-size: .85rem;
+  padding: .4rem .8rem;
+  border-radius: 7px;
+  display: flex;
+  align-items: flex-start;
+  gap: .5rem;
+}
+.rev-opt.rc { background: var(--correct-bg); color: #4ade80; }
+.rev-opt.rw { background: var(--wrong-bg); color: #f87171; }
+.rev-opt.neutral { color: var(--muted); }
+.rev-opt .lbl { flex-shrink: 0; font-size: .75rem; font-weight: 600; width: 18px; }
+
+
+.tbl { border-collapse: collapse; margin: .5rem 0; font-size: .88rem; }
+.tbl th, .tbl td { border: 1px solid var(--gold); padding: .3rem .7rem; text-align: center; }
+.tbl th { background: rgba(201,162,39,.15); color: var(--gold2); }
+
+/* Animations */
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+.fade-up { animation: fadeUp .35s ease both; }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+.fade-in { animation: fadeIn .5s ease both; }
+
+/* mobile */
+@media(max-width:600px){
+  .quiz-header { flex-wrap: wrap; gap: .5rem; }
+  .progress-wrap { order: 3; max-width: 100%; width: 100%; }
+  .quiz-body { padding: 1.5rem 1rem; }
+  h1 { font-size: 1.8rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════ SPLASH ════════════════ -->
+<div id="splash">
+  <div class="splash-inner fade-up">
+    <div class="logo-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+      UNEC · Tədris Platforması
+    </div>
+    <h1>Ehtimal <span>Nəzəriyyəsi</span> Testi</h1>
+    <p class="subtitle">Hər girişdə 333 sualdan <strong style="color:var(--text)">30 sual</strong> təsadüfi seçilir.<br>Cavabı seçdiyiniz anda dərhal yoxlanılır.</p>
+    <div class="stats-row">
+      <div class="stat"><div class="stat-num">30</div><div class="stat-label">Sual</div></div>
+      <div class="stat"><div class="stat-num">30</div><div class="stat-label">Dəqiqə</div></div>
+      <div class="stat"><div class="stat-num">333</div><div class="stat-label">Sual Bazası</div></div>
+    </div>
+    <button class="btn-start" onclick="startQuiz()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Testi Başlat
+    </button>
+  </div>
+</div>
+
+<!-- ════════════════ QUIZ ════════════════ -->
+<div id="quiz">
+  <header class="quiz-header">
+    <div class="header-brand">UNEC · Ehtimal</div>
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span id="q-counter">Sual 1 / 30</span>
+        <span id="answered-count">0 cavablandı</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+    <div class="timer-box" id="timer-box">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span id="timer-display">30:00</span>
+    </div>
+  </header>
+
+  <div class="quiz-body">
+    <div id="q-num" class="q-num"></div>
+    <div id="q-text" class="q-text fade-up"></div>
+    <div id="options" class="options fade-up"></div>
+
+    <div class="dot-map" id="dot-map"></div>
+
+    <div class="q-nav">
+      <button class="btn-nav" id="btn-prev" onclick="navigate(-1)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Əvvəlki
+      </button>
+      <button class="btn-nav btn-finish" id="btn-finish" onclick="finishQuiz()">
+        Bitir &amp; Nəticə
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+      </button>
+      <button class="btn-nav" id="btn-next" onclick="navigate(1)">
+        Növbəti
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ RESULTS ════════════════ -->
+<div id="results">
+  <div class="results-inner">
+    <div class="score-hero fade-in">
+      <div class="score-ring">
+        <svg viewBox="0 0 120 120" width="130" height="130">
+          <circle class="ring-bg" cx="60" cy="60" r="50"/>
+          <circle class="ring-fg" id="ring-fg" cx="60" cy="60" r="50"/>
+        </svg>
+        <div class="score-pct">
+          <div class="score-pct-num" id="pct-num">0%</div>
+          <div class="score-pct-label">Nəticə</div>
+        </div>
+      </div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-sub" id="result-sub"></div>
+      <div class="score-stats">
+        <div class="ss"><div class="ss-num" style="color:var(--correct-border)" id="r-correct">0</div><div class="ss-label">Düzgün</div></div>
+        <div class="ss"><div class="ss-num" style="color:var(--wrong-border)" id="r-wrong">0</div><div class="ss-label">Səhv</div></div>
+        <div class="ss"><div class="ss-num" style="color:var(--muted)" id="r-skip">0</div><div class="ss-label">Cavabsız</div></div>
+      </div>
+      <button class="btn-retry" onclick="retryQuiz()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.69"/></svg>
+        Yeni Test Başlat
+      </button>
+    </div>
+    <div class="review-title">📋 Sualların İcmalı</div>
+    <div id="review-list"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  QUESTION BANK
+// ══════════════════════════════════════════
+const BANK = [
+{id:85,q:"Mağazaya gətirilən 30 televizordan beşində gizli qüsur var. Alınan 2 televizorun qüsursuz olması hadisəsinin ehtimalını tapın (cavabı 58p kimi qeyd edin).",o:["40","30","20","24","Düzgün cavab yoxdur"],c:0},
+{id:86,q:"Sorğuya 6 kişi və 4 qadından ibarət qrup cəlb olunmuşdu. Sorğu aparılan 3 nəfərin hamısının qadın olması hadisəsinin ehtimalını tapın.",o:["1/2","Düzgün cavab yoxdur","11/30","3/4","1/30"],c:4},
+{id:87,q:"Elektrik stansiyasında 4-ü qadın olmaqla 12 mühəndis işləyir. Hər gün növbəyə 3 işçi çıxır. Onların üçünün də kişi olması hadisəsinin ehtimalını tapın.",o:["14/55","Düzgün cavab yoxdur","8/55","1/12","1/55"],c:0},
+{id:88,q:"Aşağıdakı təkliflərdən hansılar doğrudur?<br>I) A hadisəsinin ehtimalı, həmin hadisə üçün əlverişli elementar hadisələrin sayının bütün eyniimkanlı elementar hadisələrin sayına olan <em>nisbətinə</em> deyilir.<br>II) A hadisəsinin ehtimalı ... sayına olan <em>hasilinə</em> deyilir.<br>III) İki birgəolmayan A və B hadisələrinin cəminin ehtimalı: \\(P(A+B)=P(A)+P(B)\\)<br>IV) İki birgə olan A və B hadisələrinin cəminin ehtimalı: \\(P(A+B)=P(A)+P(B)\\)",o:["I və IV","Düzgün cavab yoxdur","I və III","III və IV","Yalnız I"],c:2},
+{id:91,q:"Sexdə 6 mühərrik var. Hər bir anda mühərrikin qoşulması ehtimalı 0,8-ə bərabərdir. Bütün mühərriklərin qoşulmaması ehtimalını tapın.",o:["0,000064","0,064","0,0062","0,062","0,0064"],c:0},
+{id:92,q:"n sayda Bernulli sınaqlarında \\(n=10\\) və \\(p=0{,}9\\) olduqda ən böyük ehtimallı ədədi tapın.",o:["7","5 və 4","6 və 7","9","8"],c:3},
+{id:149,q:"Zərin üst üzündə 2 xalının düşməsinin ən böyük ehtimallı sayı 3-ə bərabərdisə, oyun zərinin atılma sayını tapın.",o:["n=18","17 ≤ n ≤ 23","16 ≤ n ≤ 18","12 ≤ n ≤ 15","Düzgün cavab yoxdur"],c:1},
+{id:150,q:"Oyun zəri 20 dəfə atılır. Zərin üst üzündə 5 xalının düşməsi hadisəsinin nisbi tezliyinin ehtimaldan meylinin mütləq qiymətcə 0,02-ni aşmaması ehtimalını tapın.",o:["2Φ(0,24)","2Φ(0,81)","Düzgün cavab yoxdur","2Φ(2,25)","2Φ(1,44)"],c:0},
+{id:151,q:"X təsadüfi kəmiyyəti \\(P(X=m)=C_{100}^{m}\\cdot 0{,}4^{m}\\cdot 0{,}6^{100-m}\\) ehtimalı ilə verilmişdir. X təsadüfi kəmiyyət 0-dan 100-ə kimi qiymətlər alırsa \\(D(4X+12)\\) dispersiyasını tapın.",o:["396","372","24","384","Düzgün cavab yoxdur"],c:3},
+{id:152,q:"X təsadüfi kəmiyyəti \\(P(X=m)=C_{100}^{m}\\cdot 0{,}6^{m}\\cdot 0{,}4^{100-m}\\) ehtimalı ilə verilmişdir. X 0-dan 100-ə kimi qiymətlər alırsa \\(M(4X+12)\\) riyazi gözləməsini tapın.",o:["Düzgün cavab yoxdur","384","252","396","372"],c:2},
+{id:153,q:"Dəmir pul 25 dəfə atılır. \"Xəritə\" üzünün düşməsi hadisəsinin nisbi tezliyinin ehtimaldan meylinin mütləq qiymətcə 0,01-i aşmaması ehtimalını tapın.",o:["Düzgün cavab yoxdur","2Φ(2,25)","2Φ(1,74)","2Φ(0,87)","2Φ(0,1)"],c:4},
+{id:154,q:"Asılı olmayan 300 sınağın hər birində hadisənin baş verməsi ehtimalı 0,75-ə bərabərdir. Hadisənin baş verməsinin nisbi tezliyinin ehtimaldan meylinin mütləq qiymətcə 0,01-i aşmaması ehtimalını tapın.",o:["2Φ(0,4)","2Φ(0,2)","Düzgün cavab yoxdur","2Φ(4)","2Φ(0,6)"],c:0},
+{id:155,q:"Asılı olmayan 8400 sınağın hər birində hadisənin baş verməsi ehtimalı 0,7-ə bərabərdir. Hadisənin baş verməsinin nisbi tezliyinin ehtimaldan meylinin mütləq qiymətcə 0,0003-i aşmaması ehtimalını tapın.",o:["2Φ(4)","2Φ(0,25)","Düzgün cavab yoxdur","2Φ(0,06)","2Φ(0,6)"],c:3},
+{id:156,q:"Oyun zəri 3 dəfə atılır. Zərin üst üzündə 1 xalının 2 dəfədən az olmayaraq düşməsi ehtimalını tapın.",o:["Düzgün cavab yoxdur","15/216","125/216","2/27","5/27"],c:3},
+{id:157,q:"Oyun zəri 3 dəfə atılır. Zərin üst üzündə 2 xalının heç olmasa bir dəfə düşməsi ehtimalını tapın.",o:["5/216","125/216","Düzgün cavab yoxdur","91/216","1/216"],c:3},
+{id:158,q:"Oyun zəri 5 dəfə atılır. Zərin üst üzündə iki dəfə 4 xalının düşməsi ehtimalını tapın.",o:["0,42032","0,23091","0,16075","Düzgün cavab yoxdur","0,31095"],c:2},
+{id:159,q:"Hər hansı bölgədə yaşayan 100 ailəldən 80-nə internet xətti çəkilib. Həmin bölgədə yaşayan 400 ailənin 300-dən 350-yə qədərində internet olması ehtimalını tapın.",o:["Düzgün cavab yoxdur","Φ(2,5)−Φ(3,75)","Φ(3,75)−Φ(2,5)","Φ(3)−Φ(2,5)","Φ(3,75)+Φ(2,5)"],c:4},
+{id:161,q:"Tutaq ki, standart olmayan detalın dəzgahdan buraxılması ehtimalı 0,002-ə bərabərdir. 2000 detaldan 4-nün standart olmaması ehtimalını tapın.",o:["\\(\\dfrac{16}{3}e^{-4}\\)","Düzgün cavab yoxdur","\\(\\dfrac{32}{4}e^{-4}\\)","\\(\\dfrac{32}{3}e^{-2}\\)","\\(\\dfrac{32}{3}e^{-4}\\)"],c:4},
+{id:162,q:"Firmada istehsal olunan malların reklama ehtiyacının olmasını deyənlər 60%, reklama ehtiyacı olmamasını deyənlər 40% faiz təşkil edir. Təsadüfi seçilmiş 3 işçidən ikisinin reklamın vacibliyini vurğulaması ehtimalını tapın.",o:["0,064","Düzgün cavab yoxdur","0,0256","0,432","0,256"],c:3},
+{id:163,q:"İstehsal olunan cihazların 25%-ində qüsur aşkarlanır. Təsadüfi qaydada seçilmiş 12 cihazın qüsursuz olmasının ən böyük ehtimallı ədədini tapın.",o:["4","Düzgün cavab yoxdur","9","3","8"],c:2},
+{id:164,q:"Statistikaya görə hər doğulan 10 uşaqdan altısı qızdır. Ailəldə 3 uşaq var, onların ikisinin oğlan olma ehtimalını tapın.",o:["0,3","0,125","Düzgün cavab yoxdur","0,465","0,096"],c:0},
+{id:165,q:"Hər sınaqda A hadisəsinin baş vermə ehtimalı 0,9-a bərabərdir. Bu hadisə üçün ən böyük ehtimallı ədədin 24-ə bərabər olması üçün neçə ardıcıl sınaq aparmaq lazımdır?",o:["31","Düzgün cavab yoxdur","27","26","28"],c:3},
+{id:166,q:"Elektrik lamapasının saz olması ehtimalı 0,8-ə bərabərdir. Təsadüfi götürülən 5 elektrik lamapasından 3-ünün saz işləmə hadisəsinin ehtimalını tapın.",o:["0,02048","0,0512","0,2048","0,512","Düzgün cavab yoxdur"],c:2},
+{id:167,q:"Dərslik 10000 nüsxə tirajla nəşr olunur. Dərsliyin çap olunmasında 0,0002 ehtimalla çap səhvinə yol verilmişdir. 10000 dərsliyin 4-ündə çap səhvinin olması ehtimalını tapın.",o:["\\(e^{-2}\\)","Düzgün cavab yoxdur","\\(\\dfrac{2}{3}e^{-2}\\)","\\(\\dfrac{15}{4}e^{-2}\\)","\\(\\dfrac{4}{15}e^{2}\\)"],c:2},
+{id:169,q:"Bank 100 fermer təsərrüfatına faizsiz 10 il müddətinə kredit verir. Hər bir fermerin kredit məbləğini geri qaytarması ehtimalı 0,8-ə bərabərdir. Ən böyük ehtimallı ədədi tapın.",o:["Düzgün cavab yoxdur","83","82","84","80"],c:4},
+{id:170,q:"Tutaq ki, standart olmayan detalın dəzgahdan buraxılması ehtimalı 0,004-ə bərabərdir. 1000 detaldan 5-nin standart olmaması ehtimalını tapın.",o:["\\(\\dfrac{128}{15}e^{-4}\\)","Düzgün cavab yoxdur","\\(\\dfrac{2}{15}e^{-4}\\)","\\(\\dfrac{124}{15}e^{-4}\\)","\\(\\dfrac{128}{15}e^{4}\\)"],c:0},
+{id:172,q:"X təsadüfi kəmiyyətinin paylanma qanunu: \\(x\\): 1, 2, 3, 4; \\(p\\): 0,2, 0,1, 0,3, 0,4. \\(1\\le x\\le 4\\) olduqda \\(F(x)\\) paylanma funksiyasının aldığı qiyməti tapın.",o:["0,1","Düzgün cavab yoxdur","0,2","0,6","0,3"],c:3},
+{id:173,q:"X paylanma qanunu: \\(x\\): 1, 2, 3, 4; \\(p\\): 0,2, 0,3, 0,1, 0,4. \\(x<1\\) olduqda \\(F(x)\\) paylanma funksiyasının aldığı qiyməti tapın.",o:["0","Düzgün cavab yoxdur","0,1","0,2","0,3"],c:0},
+{id:174,q:"X paylanma qanunu: \\(x\\): 2, 4, 5; \\(p\\): 0,5, 0,2, 0,3. \\(4\\le x<5\\) olduqda paylanma funksiyasının aldığı qiyməti tapın.",o:["0,5","Düzgün cavab yoxdur","0,2","0,7","0,1"],c:3},
+{id:175,q:"X paylanma qanunu: \\(x\\): 10, 20, 30, 40, 50; \\(p\\): 0,2, 0,3, 0,35, 0,1, 0,05. \\(30<x\\le 40\\) olduqda \\(F(x)\\)-in aldığı qiyməti tapın.",o:["Düzgün cavab yoxdur","0,3","0,1","0,35","0,85"],c:4},
+{id:176,q:"Asılı olmayan X və Y diskret təsadüfi kəmiyyətlərinin paylanma qanunları verilmişdir:<br>\\(X\\): −1, 0, 1; \\(p\\): 0,3, 0,5, 0,2<br>\\(Y\\): 0, 1, 3; \\(p\\): 0,6, 0,1, 0,3<br>\\(M(2XY)\\) riyazi gözləməsini tapın.",o:["Düzgün cavab yoxdur","0,5","0,6","−0,2","1"],c:3},
+{id:178,q:"X diskret təsadüfi kəmiyyəti tam müsbət qiymətlərini \\(P(x=m)=\\dfrac{2^m}{m!}e^{-2}\\) ehtimalı ilə alır. \\(M(X-MX+2X-1)\\) riyazi gözləməsini tapın.",o:["3","0","−1","1/2","2"],c:0},
+{id:179,q:"\\(MX=a\\) olduqda \\(M(2X-a)\\) riyazi gözləməsini tapın.",o:["a","−a","2","3a","0"],c:0},
+{id:180,q:"\\(MX=2\\) olduqda \\(Z=X-2\\) kəmiyyətinin riyazi gözləməsini tapın.",o:["4","−2","2","0","1"],c:3},
+{id:181,q:"\\(MX=3,\\ MY=2\\) olduqda \\(Z=2X-3Y+5\\) təsadüfi kəmiyyətinin riyazi gözləməsini tapın.",o:["1","−3","0","2","5"],c:4},
+{id:182,q:"X diskret təsadüfi kəmiyyəti müsbət tam qiymətlərini \\(P(x=m)=\\dfrac{3^m}{m!}e^{-3}\\) ehtimalı ilə alır. \\(M(5X+1)\\) riyazi gözləməsini tapın.",o:["1","−3","5","3","16"],c:4},
+{id:183,q:"X təsadüfi kəmiyyəti 0-dan 10-a kimi müsbət tam qiymətlər alır: \\(P(x=m)=C_{10}^{m}\\cdot 0{,}8^m\\cdot 0{,}2^{10-m}\\). \\(M(2X+MX)\\) tapın.",o:["8","16","24","MX","20"],c:2},
+{id:184,q:"X: \\(P(x=m)=C_{10}^{m}\\cdot 0{,}2^m\\cdot 0{,}8^{10-m}\\). \\(M(2X-3)\\) tapın.",o:["1","1/2","2","−3","1/3"],c:0},
+{id:185,q:"X: \\(P(x=m)=C_{5}^{m}\\cdot 0{,}1^m\\cdot 0{,}9^{5-m}\\). \\(M(2X+3)\\) riyazi gözləməsini tapın.",o:["4","1","2","0,1","0,9"],c:0},
+{id:186,q:"\\(M(X)=1,\\ M(Y)=2\\) olarsa, \\(Z=5X-2Y+4\\) olduqda \\(M(Z)\\) tapın.",o:["2","3","4","5","6"],c:3},
+{id:189,q:"Hər 100 sınaqda A hadisəsinin baş vermə ehtimalı 0,7-yə bərabər olarsa, A hadisəsinin baş verməsini göstərən X təsadüfi kəmiyyətin riyazi gözləməsini tapın.",o:["60","40","20","70","50"],c:3},
+{id:190,q:"Hədəfə 45 atəş açılır. Hər bir atəşin hədəfə dəyməsi ehtimalı 1/3-yə bərabərdir. Hədəfə dəyən güllərin sayını X ilə işarə edək. X-in riyazi gözləməsini tapın.",o:["0,5","1","5","10","15"],c:4},
+{id:191,q:"200 sınağın hər birində A hadisəsinin baş verməsi ehtimalı 0,4-ə bərabərdir. A hadisəsinin 200 sınaqda baş verməsini göstərən X kəmiyyətinin riyazi gözləməsini tapın.",o:["50","70","60","80","40"],c:3},
+{id:192,q:"Fəhlə 3 dəzgahda işləyir. Fəhlənin növbə ərzində hər bir dəzgahda işləməsi ehtimalı 0,8-yə bərabərdir. X — işlənilən dəzgahların sayıdır. X-in riyazi gözləməsini tapın.",o:["1,3","4,1","2,4","3,2","5,9"],c:2},
+{id:197,q:"Müəssisədə məmulatın 20%-i 1-ci, 30%-i 2-ci, 50%-i 3-cü maşında istehsal olunur. Bu maşınların buraxdığı məmulatın uyğun olaraq 5%, 4%, 2%-i yararsızdır. İxtiyari götürülmüş bir yararsız məmulatın 1-ci maşında hazırlanması ehtimalını tapın.",o:["20/69","Düzgün cavab yoxdur","19/69","5/16","13/69"],c:3},
+{id:198,q:"\\(M(X)=50,\\ M(Y)=30\\) olarsa, \\(Z=12X+15Y-10\\) təsadüfi kəmiyyətinin riyazi gözləməsini tapın.",o:["950","11","1060","1040","Düzgün cavab yoxdur"],c:3},
+{id:200,q:"\\(MX=5,\\ MY=3,\\ Z=\\dfrac{1}{5}X+\\dfrac{1}{3}Y\\) — riyazi gözləməsini tapın.",o:["Düzgün cavab yoxdur","1/3","2","1/5","1/15"],c:2},
+{id:201,q:"\\(M(X)=2,\\ M(Y)=1\\) olarsa, \\(Z=X+Y+1\\) olduqda \\(M(Z)\\) tapın.",o:["5","4","3","2","1"],c:1},
+{id:202,q:"\\(M(X)=2,\\ M(Y)=1\\) olarsa, \\(Z=5X+Y+1\\) olduqda \\(M(Z)\\) tapın.",o:["13","12","14","15","10"],c:1},
+{id:203,q:"\\(M(X)=1,\\ M(Y)=2\\) olarsa, \\(Z=5X-2Y+4\\) olduqda \\(M(Z)\\) tapın.",o:["6","4","2","3","5"],c:4},
+{id:204,q:"\\(M(X)=3,\\ M(Y)=1\\) olarsa, \\(Z=4X-3Y+1\\) olduqda \\(M(Z)\\) tapın.",o:["10","30","5","3","20"],c:0},
+{id:205,q:"\\(M(X)=2,\\ M(Y)=2\\) olarsa, \\(Z=X-5Y+1\\) olduqda \\(M(Z)\\) tapın.",o:["−4","−2","−7","−5","−3"],c:2},
+{id:214,q:"\\(M(X)=9,\\ M(Y)=2\\) olarsa, \\(Z=2X-2Y+1\\) olduqda \\(M(Z)\\) tapın.",o:["15","11","13","14","12"],c:0},
+{id:216,q:"\\(M(X)=3,\\ M(Y)=4\\) olarsa, \\(Z=2X+Y+3\\) olduqda \\(M(Z)\\) tapın.",o:["15","14","13","12","11"],c:2},
+{id:217,q:"\\(M(X)=2,\\ M(Y)=5\\) olarsa, \\(Z=2X-Y+3\\) olduqda \\(M(Z)\\) tapın.",o:["2","1","3","4","5"],c:0},
+{id:223,q:"X təsadüfi kəmiyyətinin paylanma qanunu: \\(x\\): 10, 20, 50; \\(p\\): 0,1, 0,6, 0,3. Onun riyazi gözləməsini tapın.",o:["21,6","Düzgün cavab yoxdur","216","28","100"],c:3},
+{id:224,q:"X paylanma qanunu: \\(x\\): 10, 20, 30; \\(p\\): 0,2, 0,5, 0,3. \\(Z=7X+4\\) kəmiyyətinin riyazi gözləməsini tapın.",o:["Düzgün cavab yoxdur","210","151","147","150"],c:2},
+{id:226,q:"\\(M(X)=5,\\ M(Y)=3\\) olarsa, \\(Z=12X-11Y+1\\) olduqda \\(M(Z)\\) tapın.",o:["10","11","Düzgün cavab yoxdur","28","111"],c:3},
+{id:227,q:"\\(M(X)=21,\\ M(Y)=16\\) olarsa, \\(Z=40X-11Y-25\\) kəmiyyətinin riyazi gözləməsini tapın.",o:["639","Düzgün cavab yoxdur","150","680","689"],c:0},
+{id:228,q:"Diskret x təsadüfi kəmiyyətinin paylanma qanunu: \\(x\\): 1, 2, 3; \\(p\\): 0,3, 0,4, 0,3. \\(M(5x^2-7)\\) tapın.",o:["5","Düzgün cavab yoxdur","2","13,8","16"],c:4},
+{id:231,q:"Diskret x paylanma qanunu: \\(x\\): −1, 0, 2; \\(p\\): 0,2, 0,3, 0,5. \\(Dx\\) tapın.",o:["0,7","1,56","1,4","Düzgün cavab yoxdur","0,9"],c:1},
+{id:232,q:"Binomial paylanmanın dispersiyasını tapın.",o:["\\(np\\)","\\(npq\\)","\\(nq\\)","\\(np+q\\)","Düzgün cavab yoxdur"],c:1},
+{id:233,q:"Dəmir pulu necə dəfə atmaq lazımdır ki, hər hansı üzünün düşməsini göstərən X kəmiyyətin dispersiyası 6-ya bərabər olsun?",o:["6","24","Düzgün cavab yoxdur","10","12"],c:1},
+{id:234,q:"Bir oyun zərini bir dəfə atdıqda düşən xalların sayının riyazi gözləməsini tapın.",o:["3,2","3,4","3,5","3,6","Düzgün cavab yoxdur"],c:2},
+{id:236,q:"Hansı halda \\(D(X+Y)=D(X)\\) doğrudur?",o:["X və Y asılı olmayan təsadüfi kəmiyyətlər olduqda","X və Y diskret təsadüfi kəmiyyətlər olduqda","Y – sabit kəmiyyət olduqda","Y kəsilməz təsadüfi kəmiyyət olduqda","Düzgün cavab yoxdur"],c:2},
+{id:237,q:"X paylanma qanunu: \\(x\\): 10, 20, 50; \\(p\\): 0,1, 0,6, 0,3. X-in dispersiyasını tapın.",o:["Düzgün cavab yoxdur","28","216","1000","21,6"],c:2},
+{id:238,q:"X paylanma qanunu: \\(X\\): −1, 0, 1; \\(p\\): 0,5, 0,2, 0,3. \\(D(3X-7)\\) dispersiyasını tapın.",o:["6,84","0,3","6,52","Düzgün cavab yoxdur","2,8"],c:0},
+{id:239,q:"Puasson paylanmasında dispersiya nəyə bərabərdir?",o:["\\(3\\lambda\\)","\\(\\lambda\\)","\\(\\dfrac{2}{\\lambda}\\)","Düzgün cavab yoxdur","\\(\\dfrac{3}{\\lambda}\\)"],c:1},
+{id:240,q:"\\(P_n(k)\\approx\\dfrac{\\lambda^k}{k!}e^{-\\lambda}\\) düsturu ilə hesablanan Puasson paylanmasında \\(M^2 X\\) nəyə bərabərdir?",o:["Düzgün cavab yoxdur","\\(\\dfrac{1}{\\lambda}\\)","\\(\\lambda^2\\)","\\(3\\lambda\\)","\\(\\dfrac{2}{\\lambda}\\)"],c:2},
+{id:243,q:"\\(DX=2,\\ DY=3\\) olduqda \\(D(8X-5Y+7)\\) dispersiyasını tapın.",o:["25","64","203","128","75"],c:2},
+{id:244,q:"\\(DX=a\\) olduqda \\(D(2X-D(X))\\) dispersiyasını tapın.",o:["4a","2","a","2a","0"],c:0},
+{id:245,q:"\\(DX=a\\) olduqda \\(D(2X-a)\\) dispersiyasını tapın.",o:["a","0","4a","3a","2a"],c:2},
+{id:255,q:"Hər 100 sınaqda A hadisəsinin baş verməsi ehtimalı 0,6-ya bərabər olarsa, A hadisəsinin baş verməsini göstərən X kəmiyyətin riyazi gözləməsini və dispersiyasını tapın. Onların cəmini yazın.",o:["87","62","65","Düzgün cavab yoxdur","84"],c:4},
+{id:265,q:"Diskret X təsadüfi kəmiyyətinin sonlu \\(M(X)\\) riyazi gözləməsi varsa, onda \\(M[X-M(X)]^2\\) ifadəsinə X kəmiyyətinin _______ deyilir.",o:["Düzgün cavab yoxdur","Riyazi gözləməsi","Momenti","Dispersiyası","Orta kvadratik meyli"],c:3},
+{id:267,q:"Diskret X kəmiyyətinin sonlu \\(M(X)\\) varsa, onda \\(M[X-M(X)]^2\\) ifadəsinin kvadrat kökünə X kəmiyyətinin _______ deyilir.",o:["Riyazi gözləməsi","Düzgün cavab yoxdur","Orta kvadratik meyli","Dispersiyası","Momenti"],c:2},
+{id:269,q:"Dispersiyanın xassəsinə aid deyil:",o:["\\(D(CX)=CD(X)\\)","Düzgün cavab yoxdur","\\(D(X+Y)=D(X)+D(Y)\\)","\\(D(C)=0\\)","\\(D(X-Y)=D(X)+D(Y)\\)"],c:0},
+{id:272,q:"Qeyri-məhdud sayda detallar qüsur aşkar edilənə qədər yoxlanılır. Hər bir detalın qüsurlu olma ehtimalının 0,25 olduğunu nəzərə alıb, X diskret kəmiyyətinin dispersiyasını tapın.",o:["Düzgün cavab yoxdur","5","12","4","16"],c:2},
+{id:273,q:"Qeyri-məhdud sayda detallar qüsur aşkar edilənə qədər yoxlanılır. Hər bir detalın qüsurlu olma ehtimalının 0,25 olduğunu nəzərə alıb, X diskret kəmiyyətinin riyazi gözləməsini tapın.",o:["Düzgün cavab yoxdur","12","4","8","6"],c:2},
+{id:274,q:"Oyun zəri 60 dəfə atılır. Bu sınaqlarda zərin üst üzündə 3 xalının düşmə sayını göstərən X kəmiyyətinin dispersiyasını tapın.",o:["25/3","10","50/3","25","Düzgün cavab yoxdur"],c:0},
+{id:275,q:"Oyun zəri 60 dəfə atılır. Bu sınaqlarda zərin üst üzündə 6 xalının düşmə sayını göstərən X kəmiyyətinin riyazi gözləməsini tapın.",o:["65","Düzgün cavab yoxdur","10","5","54"],c:2},
+{id:280,q:"Asılı olmayan X və Y kəmiyyətlər müvafiq olaraq (2;8) və (10;16) intervalında müntəzəm paylanmışdır. \\(M(2XY)\\) tapın.",o:["3","130","Düzgün cavab yoxdur","13","2"],c:1},
+{id:281,q:"X kəsilməz kəmiyyət (2,4) intervalında müntəzəm paylanmışdır. \\(M(X+2)\\) tapın.",o:["5","6","3","Düzgün cavab yoxdur","5/3"],c:0},
+{id:282,q:"X kəsilməz kəmiyyət (2,4) intervalında müntəzəm paylanmışdır. \\(D(2X-3)\\) tapın.",o:["Düzgün cavab yoxdur","4/3","1/4","2/3","1/3"],c:1},
+{id:284,q:"X kəsilməz kəmiyyət (2,6) intervalında müntəzəm paylanmışdır. \\(M(MX)\\) tapın.",o:["2","Düzgün cavab yoxdur","4","1","6"],c:2},
+{id:286,q:"X kəsilməz kəmiyyət (a,b) intervalında müntəzəm paylanmışdır. \\(DX\\) tapın.",o:["\\(\\dfrac{b+a}{2}\\)","\\(\\dfrac{(b-a)^2}{12}\\)","\\(\\dfrac{b+a}{3}\\)","Düzgün cavab yoxdur","\\(\\dfrac{b-a}{3}\\)"],c:1},
+{id:287,q:"X kəsilməz kəmiyyət (a,b) intervalında müntəzəm paylanmışdır. \\(MX\\) tapın.",o:["\\(\\dfrac{b+a}{2}\\)","Düzgün cavab yoxdur","\\(\\dfrac{b}{2}\\)","\\(\\dfrac{b-a}{2}\\)","\\(\\dfrac{a}{2}\\)"],c:0},
+{id:289,q:"X kəsilməz kəmiyyətinin sıxlıq funksiyası \\(f(x)=\\dfrac{2}{9}(3x-x^2)\\), \\(x\\in[0,3]\\); \\(f(x)=0\\), \\(x\\notin[0,3]\\) kimi verilmişdir. \\(P(1<x<2)\\) tapın.",o:["Düzgün cavab yoxdur","1/3","13/27","2/5","1/2"],c:2},
+{id:292,q:"X kəmiyyəti \\(F(x)=\\dfrac{1}{2}+\\dfrac{1}{\\pi}\\text{arctg}\\,x\\) paylanma funksiyası ilə verilmişdir. \\(P(0<x\\le1)\\) tapın.",o:["1/2","1/4","2/π","Düzgün cavab yoxdur","1/π"],c:1},
+{id:295,q:"X kəsilməz kəmiyyətinin paylanma funksiyası: \\(F(x)=0\\) (\\(x\\le0\\)), \\(F(x)=x^2\\) (\\(0<x\\le1\\)), \\(F(x)=1\\) (\\(x>1\\)). X kəmiyyətinin (0,25; 0,75) intervalında qiymət alması ehtimalını tapın.",o:["0,2","0,5","Düzgün cavab yoxdur","0,1","0,3"],c:1},
+{id:299,q:"X kəsilməz kəmiyyətinin paylanma funksiyası: \\(F(x)=0\\) (\\(x\\le0\\)), \\(F(x)=x/2\\) (\\(0<x\\le2\\)), \\(F(x)=1\\) (\\(x>2\\)). \\(P(x\\le1)\\) tapın.",o:["Düzgün cavab yoxdur","0,5","1","0,2","0,1"],c:1},
+{id:300,q:"X kəsilməz kəmiyyətinin sıxlıq funksiyası \\(f(x)=a\\sin x\\), \\(x\\in[0,\\pi]\\); \\(f(x)=0\\), \\(x\\notin[0,\\pi]\\). \\(a\\) sabitini tapın.",o:["Düzgün cavab yoxdur","0,5","0,2","0,1","0,3"],c:1},
+{id:301,q:"X kəsilməz kəmiyyətinin paylanma funksiyası: \\(F(x)=0\\) (\\(x\\le1\\)), \\(F(x)=\\dfrac{x-1}{2}\\) (\\(1<x\\le3\\)), \\(F(x)=1\\) (\\(x>3\\)). \\(P(2{,}5<x<3{,}5)\\) tapın.",o:["1,5","Düzgün cavab yoxdur","0,25","0,2","0,05"],c:2},
+{id:303,q:"X kəsilməz kəmiyyətinin paylanma funksiyası: \\(F(x)=(x-2)^2\\), \\(2\\le x\\le3\\); \\(F(x)=1\\) (\\(x>3\\)). \\(P(2{,}5<x<3{,}5)\\) tapın.",o:["Düzgün cavab yoxdur","2,5","0,75","3,5","3"],c:2},
+{id:327,q:"Sıxlıq funksiyası həmin intervalda sabit \\(f(x)=\\dfrac{1}{b-a}\\) qiymətini, bu intervalın xaricində isə \\(f(x)=0\\) qiymətini alırsa, onda X kəsilməz kəmiyyətinə (a,b) intervalında _______ paylanmış kəmiyyət deyilir.",o:["Normal","Müntəzəm","Düzgün cavab yoxdur","Binomial","Üstlü"],c:1},
+{id:329,q:"X kəsilməz kəmiyyətinin paylanma funksiyası: \\(F(x)=0\\) (\\(x\\le1\\)), \\(F(x)=0{,}6\\) (\\(1<x\\le2\\)), \\(F(x)=0{,}8\\) (\\(2<x\\le4\\)), \\(F(x)=1\\) (\\(x>4\\)). \\(P(X\\ge3)\\) tapın.",o:["1","0,3","0,2","0,8","Düzgün cavab yoxdur"],c:2},
+{id:330,q:"(23,57) intervalında müntəzəm paylanmış X kəsilməz kəmiyyətinin riyazi gözləməsini tapın.",o:["30","40","16","17","Düzgün cavab yoxdur"],c:1},
+{id:332,q:"X kəsilməz kəmiyyəti (0,2) intervalında \\(f(x)=\\dfrac{1}{2}x\\) sıxlıq funksiyası ilə verilmişdir. X-in dispersiyasını tapın.",o:["4/3","Düzgün cavab yoxdur","2","2/3","2/9"],c:4},
+{id:333,q:"(20,80) intervalında müntəzəm paylanmış X kəmiyyətinin riyazi gözləməsi və dispersiyasının cəmini tapın.",o:["350","50","360","Düzgün cavab yoxdur","300"],c:0}
+,
+{id:89,q:"\"Riyaziyyat\" və \"Riyaziyyat müəllimliyi\" ixtisası üzrə təhsilini başa vuranların say nisbəti 2:3 kimidir. \"Riyaziyyat\" ixtisası üzrə təhsil alanların 92%-i, \"Riyaziyyat müəllimliyi\" ixtisası üzrə təhsil alanların 95%-i ixtisasına uyğun iş tapa bilirlər. Bu ixtisaslar üzrə işə qəbul edilmiş hər hansı bir mütəxəssisin \"Riyaziyyat müəllimliyi\" ixtisasına aid olma ehtimalını tapın.",o:["285/469","117/381","115/379","Düzgün cavab yoxdur","184/279"],c:0},
+{id:90,q:"Aşağıdakı təkliflərdən hansılar yanlışdır? I) A hadisəsinin ehtimalı nisbətə deyilir. II) A hadisəsinin ehtimalı hasilinə deyilir. III) İki birgəolmayan A və B: \\(P(A+B)=P(A)+P(B)\\) IV) İki birgə olan A və B: \\(P(A+B)=P(A)+P(B)-P(AB)\\)",o:["yalnız II","Düzgün cavab yoxdur","III və IV","I və III","I və IV"],c:0},
+{id:160,q:"Hər hansı bölgədə yaşayan 100 ailədən 90-nına internet xətti çəkilib. 900 ailədən 800-ündə internet olması ehtimalını tapın.",o:["\\(\\dfrac{\\varphi(1{,}11)}{9}\\)","Düzgün cavab yoxdur","\\(\\dfrac{\\varphi(2{,}1)}{8}\\)","\\(\\dfrac{\\varphi(4)}{9}\\)","\\(\\dfrac{\\varphi(1{,}11)}{4}\\)"],c:0},
+{id:168,q:"Aşağıdakı təkliflərdən hansı yanlışdır? I) Ən böyük ehtimallı ədəd \\(m_0\\) ədədinə deyilir. II) Bernulli: \\(P_n(m)=C_n^m\\cdot p^m\\cdot q^{n-m}\\) III) Asılı olan sınaqda: \\(P_n(m)\\approx\\dfrac{1}{\\sqrt{npq}}\\cdot\\dfrac{1}{\\sqrt{2\\pi}}\\cdot e^{-x^2/2}\\) IV) Muavr-Laplas: \\(P_n(m_1;m_2)=\\Phi(x_2)-\\Phi(x_1)\\)",o:["I və III","Düzgün cavab yoxdur","yalnız I","I və IV","yalnız III"],c:4},
+{id:171,q:"Aşağıdakı təkliflərdən hansılar doğrudur? I) Ən böyük ehtimallı ədəd \\(m_0\\) ədədinə deyilir. II) Asılı olan sınaqlarda Bernulli: \\(P_n(m)=C_n^m\\cdot p^m\\cdot q^{n-m}\\) III) Asılı olan sınaqda: \\(P_n(m)\\approx\\dfrac{1}{\\sqrt{npq}}\\cdot\\dfrac{1}{\\sqrt{2\\pi}}\\cdot e^{-x^2/2}\\) IV) Muavr-Laplas: \\(P_n(m_1;m_2)=\\Phi(x_2)-\\Phi(x_1)\\)",o:["yalnız I","Düzgün cavab yoxdur","yalnız IV","I və IV","yalnız III"],c:3},
+{id:177,q:"X diskret təsadüfi kəmiyyəti Puasson paylanma qanununa malikdir. M(2X)-i tapın.",o:["\\(\\dfrac{2}{\\lambda}\\)","\\(\\dfrac{1}{\\lambda}\\)","\\(2\\lambda\\)","\\(\\lambda\\)","\\(\\dfrac{1}{\\lambda^2}\\)"],c:2},
+{id:187,q:"Puasson paylanması hansı düsturla verilir?",o:["\\(P_n(X=k)=C_n^k p^k q^{n-k}\\)","\\(P_n(X=k)\\approx\\dfrac{\\lambda^k}{k!}e^{-\\lambda},\\;k=0,1,2,\\ldots,\\;\\lambda>0\\)","\\(P(X=k)=p\\cdot q^k\\)","\\(f(x)=\\dfrac{1}{\\sigma\\sqrt{2\\pi}}e^{-\\frac{(x-a)^2}{2\\sigma^2}}\\)","Düzgün cavab yoxdur"],c:1},
+{id:188,q:"X paylanma qanunu: \\(x_i\\): 1, 4, 6, 8; \\(p_i\\): 0,1; 0,5; 0,2; 0,2. Onun \\(0\\le x<6\\) aralığına düşmə ehtimalını hesablayın.",o:["0,5","0,7","0,6","Düzgün cavab yoxdur","0,8"],c:2},
+{id:193,q:"Diskret X paylanma qanunu verilmişdir. \\(\\sum_{k=1}^{\\infty}p_k\\) -nı tapmalı.",o:["q","p","1","Düzgün cavab yoxdur","∞"],c:2},
+{id:194,q:"Diskret x paylanma qanunu verilmişdir. \\(\\sum p_i = 0{,}3+0{,}553+0{,}553\\cdot0{,}21+\\ldots\\) cəmini tapmalı.",o:["1/2","0,21","0,3","Düzgün cavab yoxdur","1"],c:4},
+{id:195,q:"Diskret x binomial paylanma qanunu verilmişdir. \\(\\sum_{k=0}^{n}C_n^k p^k q^{n-k}\\) nəyə bərabərdir?",o:["1/2","Düzgün cavab yoxdur","p+q","0","1"],c:4},
+{id:196,q:"X kəsilməz kəmiyyəti paylanması ilə verilib: \\(x_i\\): 40, 43, 44, 45, 46; \\(p_i\\): -, -, 0,1; 0,07; 0,03. X<44 hadisəsinin ehtimalını tapın.",o:["0,5","0,8","0,1","1","Düzgün cavab yoxdur"],c:1},
+{id:199,q:"X paylanma qanunu: \\(x_1=4, x_2=6, x_3=?\\); \\(p: 0{,}5;\\; 0{,}3;\\; p_3\\). MX=8 olduqda \\(x_3\\)-ü tapın.",o:["Düzgün cavab yoxdur","4,2","1,8","20","21"],c:4},
+{id:206,q:"M(X)=1, M(Y)=2 olarsa, Z=X-3Y+7 olduqda M(Z) tapın.",o:["4","2","1","3","5"],c:1},
+{id:207,q:"M(X)=2, M(Y)=1 olarsa, Z=3X-4Y+1 olduqda M(Z) tapın.",o:["2","3","4","5","1"],c:1},
+{id:208,q:"M(X)=3, M(Y)=2 olarsa, Z=2X+3Y+1 olduqda M(Z) tapın.",o:["12","13","14","15","16"],c:1},
+{id:209,q:"M(X)=4, M(Y)=1 olarsa, Z=3X-2Y+5 olduqda M(Z) tapın.",o:["15","13","14","16","17"],c:0},
+{id:210,q:"M(X)=1, M(Y)=3 olarsa, Z=4X-Y+2 olduqda M(Z) tapın.",o:["3","2","1","4","5"],c:0},
+{id:211,q:"M(X)=2, M(Y)=3 olarsa, Z=X+2Y-1 olduqda M(Z) tapın.",o:["8","6","7","5","9"],c:1},
+{id:212,q:"M(X)=5, M(Y)=2 olarsa, Z=2X-Y+3 olduqda M(Z) tapın.",o:["11","9","10","12","8"],c:0},
+{id:213,q:"X kəsilməz kəmiyyəti paylanması: \\(x_i\\): 0, \\(x_2\\), 8; \\(p_i\\): 0,2; ?; 0,7. M(x)=6 olarsa, \\(x_2\\)-ni tapın.",o:["4","3","8","1","Düzgün cavab yoxdur"],c:0},
+{id:215,q:"M(X)=1, M(Y)=6 olarsa, Z=X-Y+4 olduqda M(Z) tapın.",o:["-1","-5","-3","-4","-2"],c:0},
+{id:218,q:"X paylanma qanunu: \\(x\\): 10, 20, 30; \\(p\\): 0,2; 0,5; 0,3. Z=3X-2,4 kəmiyyətinin riyazi gözləməsini tapın.",o:["60,6","210,6","120,4","65,4","Düzgün cavab yoxdur"],c:0},
+{id:219,q:"X paylanma qanunu: \\(x_i\\): 1, 4, 6, 8; \\(p_i\\): 0,1; 0,5; 0,2; 0,2. Onun \\(0\\le x<4\\) aralığına düşmə ehtimalını hesablayın.",o:["0,5","0,6","0,7","0,1","Düzgün cavab yoxdur"],c:3},
+{id:220,q:"X diskret kəmiyyət 3 atışda hədəfə dəyən güllərin sayını göstərir. Hər atışda hədəfə dəymə ehtimalı 0,7 olarsa, paylanma qanunu hansı cədvəldədir?",o:["\\(p_i\\): 0,025; 0,175; 0,446; 0,354","\\(p_i\\): 0,027; 0,189; 0,441; 0,343","Düzgün cavab yoxdur","\\(p_i\\): 0,343; 0,189; 0,441; 0,027","\\(p_i\\): 0,027; 0,063; 0,49; 0,343"],c:1},
+{id:221,q:"Atıcının hədəfi vurması ehtimalı 0,65-yə bərabərdir. O, hədəfə 2 güllə atıb. Atıcının hədəfi vurmasının paylanma qanununu yazın. (\\(x_i\\): 0, 1, 2)",o:["\\(p_i\\): 0,35; 0,04; 0,61","\\(p_i\\): 0,4225; 0,455; 0,1225","\\(p_i\\): 0,1225; 0,455; 0,4225","Düzgün cavab yoxdur","\\(p_i\\): 0,65; 0,04; 0,35"],c:2},
+{id:222,q:"X paylanma qanunu: \\(x_i\\): 1, 4, 6, 8; \\(p_i\\): 0,05; 0,55; 0,12; 0,28. Onun \\(0\\le x\\le5\\) aralığına düşmə ehtimalını hesablayın.",o:["Düzgün cavab yoxdur","0,8","0,6","0,5","0,7"],c:2},
+{id:225,q:"X paylanma qanunu: \\(x_i\\): 0, 1, 2; \\(p_i\\): 0,6; ?; 0,1. Riyazi gözləməsini tapın.",o:["1,1","0,5","2,2","1,2","Düzgün cavab yoxdur"],c:1},
+{id:229,q:"Həndəsi paylanma hansı düsturla verilir?",o:["Düzgün cavab yoxdur","\\(f(x)=\\dfrac{1}{\\sigma\\sqrt{2\\pi}}e^{-\\frac{(x-a)^2}{2\\sigma^2}}\\)","\\(P_n(X=k)=C_n^k p^k q^{n-k}\\)","\\(P(X=k)=p\\cdot q^k,\\;k=0,1,2,\\ldots\\)","\\(P_n(X=k)\\approx\\dfrac{\\lambda^k}{k!}e^{-\\lambda}\\)"],c:3},
+{id:230,q:"Aşağıdakılardan hansı diskret paylanmaya aiddir?",o:["Üstlü paylanma","Düzgün cavab yoxdur","Normal paylanma","Binomial paylanma","Müntəzəm"],c:3},
+{id:235,q:"Dispersiyanın xassələrinin doğru yazıldığı bəndi göstərin.",o:["\\(D(C)=C;\\; D(CX)=C^2D(X);\\; D(X\\pm Y)=D(X)+D(Y)\\)","\\(D(C)=0;\\; D(CX)=C^2D(X);\\; D(X\\pm Y)=D(X)\\pm D(Y)\\)","Düzgün cavab yoxdur","\\(D(C)=C;\\; D(CX)=CD(X)\\)","\\(D(C)=0;\\; D(CX)=CD(X)\\)"],c:1},
+{id:241,q:"Diskret X: 1, 2; p: 0,3; 0,7 və Y: 3, 4; p: 0,4; 0,6. \\(M(X^2+Y^2)\\) riyazi gözləməsini tapın.",o:["16,3","Düzgün cavab yoxdur","3,1","3,6","9,6"],c:0},
+{id:242,q:"Diskret X paylanma qanunu: x: 1, 2, 3; p: 0,2; 0,3; 0,5. \\(M(2X^2+1)\\) riyazi gözləməsini tapın.",o:["5,9","1,2","0,2","Düzgün cavab yoxdur","12,8"],c:4},
+{id:246,q:"X diskret kəmiyyəti Puasson qanunu ilə paylanıb, \\(\\lambda=0{,}3\\). \\(D(D(X)-5X)\\) dispersiyasını tapın.",o:["25","7,5","0,3","5","-5"],c:1},
+{id:247,q:"X diskret kəmiyyəti Puasson qanunu ilə paylanıb, \\(\\lambda=0{,}3\\). \\(M(3M^2X-5X)\\) riyazi gözləməsini tapın.",o:["1","-5","3","-1,23","-2"],c:3},
+{id:248,q:"X tam müsbət qiymətlərini \\(P(x=m)=\\dfrac{2^m}{m!}e^{-2}\\) ehtimalı ilə alır. \\(D(3-5X+2DX)\\) dispersiyasını tapın.",o:["-5","2","50","1","3"],c:2},
+{id:249,q:"X müsbət tam qiymətlərini \\(P(x=m)=\\dfrac{3^m}{m!}e^{-3}\\) ehtimalı ilə alır. \\(D(M(5X)+2X)\\) dispersiyasını tapın.",o:["12","0","4","2","5"],c:0},
+{id:250,q:"X kəsilməz kəmiyyəti a=0,8 və \\(\\sigma^2=1\\) parametrli normal paylanmaya malikdir. \\(D(X-MX)\\) dispersiyasını tapın.",o:["1","0,8","0","0,2","MX"],c:0},
+{id:251,q:"X: \\(P(x=m)=C_5^m\\cdot0{,}3^m\\cdot0{,}7^{5-m}\\). \\(D(2MX^2+3X)\\) dispersiyasını tapın.",o:["0","4","3","\\(2MX^2\\)","9,45"],c:4},
+{id:252,q:"X: \\(P(x=m)=C_{10}^m\\cdot0{,}2^m\\cdot0{,}8^{10-m}\\). \\(D(2X+3DX)\\) dispersiyasını tapın.",o:["3DX","4","6,4","0,2","0,8"],c:2},
+{id:253,q:"X: \\(P(x=m)=C_5^m\\cdot0{,}9^m\\cdot0{,}1^{5-m}\\). \\(D(M^2X+DX-X)\\) dispersiyasını tapın.",o:["\\(M^2X\\)","2","0,45","0","1"],c:2},
+{id:254,q:"X: \\(P(x=m)=C_{10}^m\\cdot0{,}2^m\\cdot0{,}8^{10-m}\\). \\(D(2MX+X)\\) dispersiyasını tapın.",o:["0","2MX","MX","1,6","2"],c:3},
+{id:256,q:"Asılı olmayan X və Y üçün \\(DX=\\dfrac{1}{9};\\; DY=\\dfrac{1}{16}\\) verilir. \\(Z=3X+4Y\\) dispersiyasını tapın.",o:["1/3","Düzgün cavab yoxdur","2","1/9","1/16"],c:2},
+{id:257,q:"Asılı olmayan X və Y üçün DX=1,5; DY=1 verilir. Z=2X-3Y+1 dispersiyasını tapın.",o:["5","Düzgün cavab yoxdur","15","19","6"],c:2},
+{id:258,q:"X paylanma qanunu: \\(x_i\\): -10, 0, 20; \\(p_i\\): 0,2; 0,5; 0,3. İkinci tərtib mərkəzi momentini tapın.",o:["124","140","24","4","Düzgün cavab yoxdur"],c:0},
+{id:259,q:"Fəhlə 4 dəzgahda işləyir. Hər dəzgahda işləmə ehtimalı 0,8-dir. X işlədiyi dəzgah sayıdır. Orta kvadratik meylini tapın.",o:["0,8","0,2","0,08","0,64","Düzgün cavab yoxdur"],c:0},
+{id:260,q:"D(X)=6, D(Y)=8 olarsa, Z=4X+11Y-25 dispersiyasını tapın.",o:["Düzgün cavab yoxdur","2345","1064","11","1080"],c:2},
+{id:261,q:"X paylanma qanunu: \\(x_i\\): -10, 0, 20; \\(p_i\\): 0,4; 0,4; 0,2. İkinci tərtib mərkəzi momentini tapın.",o:["Düzgün cavab yoxdur","4","124","140","120"],c:4},
+{id:262,q:"D(X)=5, D(Y)=3 olarsa, Z=2X-5Y+16 dispersiyasını tapın.",o:["111","95","11","Düzgün cavab yoxdur","10"],c:1},
+{id:263,q:"Fəhlə 2 dəzgahda işləyir. Hər dəzgahda işləmə ehtimalı 0,8-dir. X işlədiyi dəzgah sayıdır. Dispersiyasını tapın.",o:["Düzgün cavab yoxdur","1,2","0,32","0,64","1,6"],c:2},
+{id:264,q:"Diskret X-in momenti üçün hansı düstur yanlışdır?",o:["\\(\\beta_3=M(X-MX)^3=MX^3-3MX^2\\cdot MX+2M^3X\\)","Düzgün cavab yoxdur","\\(\\beta_2=M(X-MX)^2=DX\\)","\\(\\beta_1=M(X-MX)=0\\)","\\(\\beta_0=M(X-MX)^0=0\\)"],c:4},
+{id:266,q:"Riyazi gözləmənin xassələrinə aid deyil.",o:["M(CX)=CM(X)","Düzgün cavab yoxdur","M(C)=C","M(X+Y)=M(X)+M(Y)","M(X-Y)=M(X)+M(Y)"],c:4},
+{id:268,q:"Diskret X-in momenti üçün hansı düstur doğrudur?",o:["\\(\\beta_3=M(X-MX)^3=MX-3MX^2\\cdot MX+2M^3X\\)","\\(\\beta_0=M(X-MX)^0=0\\)","\\(\\beta_1=M(X-MX)=1\\)","\\(\\beta_2=M(X-MX)^2=DX\\)","Düzgün cavab yoxdur"],c:3},
+{id:270,q:"X paylanma qanunu: \\(x_i\\): -10, 0, 20; \\(p_i\\): 0,4; 0,4; 0,2. İkinci tərtib mərkəzi momentini tapın.",o:["120","4","124","140","Düzgün cavab yoxdur"],c:0},
+{id:271,q:"D(X)=25, D(Y)=12 olarsa, Z=4X-15Y-255 dispersiyasını tapın.",o:["280","2875","3100","150","Düzgün cavab yoxdur"],c:2},
+{id:276,q:"X paylanma qanunu: \\(x_i\\): 10, 20, 40, 60; \\(p_i\\): 0,2; 0,4; 0,3; 0,1. İkinci tərtib mərkəzi momentini tapın.",o:["Düzgün cavab yoxdur","28","970","1020","236"],c:4},
+{id:277,q:"X paylanma qanunu: \\(x_i\\): 10, 20, 40, 60; \\(p_i\\): 0,2; 0,4; 0,3; 0,1. Birinci tərtib başlanğıc momentini tapın.",o:["24,6","970","Düzgün cavab yoxdur","27","28"],c:4},
+{id:278,q:"X paylanma qanunu: \\(x_i\\): 10, 20, 50; \\(p_i\\): 0,2; 0,5; 0,3. Birinci tərtib başlanğıc momentini tapın.",o:["Düzgün cavab yoxdur","24,6","970","27","28"],c:3},
+{id:279,q:"X kəsilməz kəmiyyəti \\(F(x)=0\\) (\\(x\\le0\\)), \\(F(x)=x\\) (\\(0<x\\le1\\)), \\(F(x)=1\\) (\\(x>1\\)). f(x) sıxlıq funksiyasını tapın.",o:["\\(f(x)=\\dfrac{1}{x^2}\\)","Düzgün cavab yoxdur","\\(f(x)=1,\\;x\\in[0,1];\\;f(x)=0,\\;x\\notin[0,1]\\)","\\(f(x)=x,\\;x\\in[0,1];\\;f(x)=0,\\;x\\notin[0,1]\\)","\\(f(x)=\\dfrac{1}{x^3}\\)"],c:2},
+{id:283,q:"X kəsilməz kəmiyyəti (0,4) intervalında müntəzəm paylanmışdır. \\(\\sigma(X)\\)-i tapın.",o:["\\(\\dfrac{2}{\\sqrt{3}}\\)","Düzgün cavab yoxdur","2","\\(\\dfrac{1}{\\sqrt{3}}\\)","\\(\\sqrt{3}\\)"],c:0},
+{id:285,q:"X kəsilməz kəmiyyəti (a,b) intervalında müntəzəm paylanmışdır. \\(\\sigma X\\)-i tapın.",o:["\\(\\dfrac{b-a}{2\\sqrt{3}}\\)","\\(\\dfrac{b-a}{2}\\)","\\(\\dfrac{b+a}{\\sqrt{3}}\\)","\\(\\dfrac{b+a}{2}\\)","Düzgün cavab yoxdur"],c:0},
+{id:288,q:"Sıxlıq funksiyası \\(f(x)=3x^2\\), \\(x\\in[0,1]\\); \\(f(x)=0\\), \\(x\\notin[0,1]\\). MX=0,75 olduqda DX-i tapın.",o:["3/4","3/80","Düzgün cavab yoxdur","4/3","1/80"],c:1},
+{id:290,q:"X kəsilməz kəmiyyəti \\(F(x)=\\dfrac{1}{2}+\\dfrac{1}{\\pi}\\arcsin\\dfrac{x}{2}\\), \\(-2<x\\le2\\) paylanma funksiyası ilə verilmişdir. f(x) sıxlıq funksiyasını tapın.",o:["\\(\\dfrac{1}{\\pi}\\)","Düzgün cavab yoxdur","\\(f(x)=1,\\;x>2\\)","\\(\\dfrac{1}{2}\\)","\\(f(x)=\\dfrac{1}{\\pi\\sqrt{4-x^2}},\\;-2<x\\le2;\\;f(x)=0,\\;x\\notin(-2,2]\\)"],c:4},
+{id:291,q:"X bütün ox üzrə \\(F(x)=\\dfrac{1}{2}+\\dfrac{1}{\\pi}\\text{arctg}\\,x\\) ilə verilmişdir. f(x) sıxlıq funksiyasını tapın.",o:["\\(\\dfrac{1}{\\pi x^2}\\)","\\(\\dfrac{1}{\\pi(1+x^2)}\\)","\\(\\dfrac{1}{x^2}\\)","Düzgün cavab yoxdur","\\(\\dfrac{1}{\\pi}\\)"],c:1},
+{id:293,q:"Kəsilməz X: \\(F(x)=0\\) (\\(x\\le-1\\)), \\(F(x)=\\dfrac{x+1}{4}\\) (\\(-1<x\\le3\\)), \\(F(x)=1\\) (\\(x>3\\)). \\(P(x>3)\\) tapın.",o:["1","1/4","1/2","Düzgün cavab yoxdur","3/4"],c:0},
+{id:294,q:"Kəsilməz X üçün \\(f(x)=\\dfrac{2a}{1+x^2}\\) bütün ox üzrə verilmişdir. a parametrini tapın.",o:["Düzgün cavab yoxdur","\\(\\pi\\)","\\(\\dfrac{\\pi}{2}\\)","\\(\\dfrac{1}{2\\pi}\\)","\\(2\\pi\\)"],c:3},
+{id:296,q:"Sıxlıq funksiyası \\(f(x)=0{,}5\\sin x\\), \\(0\\le x\\le\\pi\\); \\(f(x)=0\\), \\(x>\\pi\\). F(x)-i tapın.",o:["Düzgün cavab yoxdur","\\(F(x)=1-\\cos x\\)","\\(F(x)=\\cos x\\)","\\(F(x)=\\begin{cases}0,&x\\le0\\0{,}5(1-\\cos x),&0<x\\le\\pi\\1,&x>\\pi\\end{cases}\\)","\\(F(x)=\\begin{cases}0,&x\\le0\\0{,}5(1-\\cos x),&0<x\\le\\pi\\0,&x>\\pi\\end{cases}\\)"],c:3},
+{id:297,q:"Sıxlıq funksiyası \\(f(x)=\\dfrac{x}{2}\\), \\(x\\in[0;2]\\); \\(f(x)=0\\), \\(x\\notin[0;2]\\). MX=\\(\\dfrac{4}{3}\\) olduqda DX-i tapın.",o:["3/16","5/16","4/3","2/9","16/23"],c:3},
+{id:298,q:"X bütün ox üzrə \\(F(x)=\\dfrac{1}{2}+\\dfrac{1}{\\pi}\\text{arctg}\\,x\\) ilə verilmişdir. \\(P(0<x\\le1)\\) tapın.",o:["1/4","Düzgün cavab yoxdur","\\(\\dfrac{2}{\\pi}\\)","\\(\\dfrac{1}{\\pi}\\)","1/2"],c:0},
+{id:302,q:"X kəsilməz kəmiyyəti: \\(F(x)=0\\) (\\(x\\le1\\)), \\(F(x)=\\dfrac{x-1}{2}\\) (\\(1<x\\le3\\)), \\(F(x)=1\\) (\\(x>3\\)). \\(P(1{,}5<x<2{,}5)\\) tapın.",o:["1","Düzgün cavab yoxdur","0,5","1,5","2,5"],c:2},
+{id:304,q:"X kəsilməz kəmiyyəti: \\(F(x)=0\\) (\\(x<2\\)), \\(F(x)=(x-2)^2\\) (\\(2\\le x\\le3\\)), \\(F(x)=1\\) (\\(x>3\\)). \\(P(1<x<2{,}5)\\) tapın.",o:["Düzgün cavab yoxdur","0,25","1","0,05","0,2"],c:1},
+{id:305,q:"MX=1,5 və \\(f(x)=\\dfrac{1}{3}\\), \\(x\\in[0;3]\\); \\(f(x)=0\\), \\(x\\notin[0;3]\\). \\(D(X+DX)\\)-i tapmalı.",o:["0,75","Düzgün cavab yoxdur","2","0,2","0,5"],c:0},
+{id:306,q:"MX=\\(\\dfrac{2}{3}\\) və \\(f(x)=2x\\), \\(x\\in[0;1]\\); \\(f(x)=0\\), \\(x\\notin[0;1]\\). \\(D(3X+MX)\\)-i tapın.",o:["2","1/2","0,1","3","1/3"],c:1},
+{id:307,q:"MX=1 və \\(f(x)=0{,}25\\), \\(x\\in[-1;3]\\); \\(f(x)=0\\), \\(x\\notin[-1;3]\\). \\(D(3X+2)\\)-i tapın.",o:["3/7","Düzgün cavab yoxdur","12","10","7/3"],c:2},
+{id:308,q:"\\(f(x)=5x^4\\), \\(x\\in[0;1]\\). \\(M(35MX^2+6MX)\\) riyazi gözləməsini tapın.",o:["25/36","1/6","6/5","5/6","30"],c:4},
+{id:309,q:"\\(f(x)=\\dfrac{2}{9}x\\), \\(x\\in[0;3]\\). MX=2 olduqda \\(D\\left(\\dfrac{x}{3}-1\\right)\\)-i tapın.",o:["1/18","3","2","1/3","2/3"],c:0},
+{id:310,q:"M(X)=0,75. Sıxlıq funksiyası \\(f(x)=3x^2\\), \\(x\\in[0;1]\\); \\(f(x)=0\\), \\(x\\notin[0;1]\\). DX-i tapın.",o:["3/80","1","3","9/80","3/70"],c:0},
+{id:311,q:"\\(f(x)=\\dfrac{1}{2}\\), \\(x\\in[1;3]\\); \\(f(x)=0\\), \\(x\\notin[1;3]\\). \\(M\\left(\\dfrac{3}{13}X^2-1\\right)\\) tapın.",o:["1/2","2","0","1","-1"],c:2},
+{id:312,q:"\\(f(x)=3x^2\\), \\(x\\in[0;1]\\); \\(f(x)=0\\), \\(x\\notin[0;1]\\). \\(M\\left(\\dfrac{5}{3}X^2+2\\right)\\)-i tapın.",o:["0","3","1/3","2","1/2"],c:1},
+{id:313,q:"\\(f(x)=\\dfrac{1}{4}\\), \\(x\\in[-1;3]\\); \\(f(x)=0\\), \\(x\\notin[-1;3]\\). \\(M\\left(X^2-\\dfrac{7}{3}\\right)\\)-i tapın.",o:["7","7/3","-7/3","0","3"],c:3},
+{id:314,q:"\\(f(x)=\\dfrac{2x}{9}\\), \\(x\\in[0;3]\\); \\(f(x)=0\\), \\(x\\notin[0;3]\\). \\(M(X^2+3)\\)-ı tapın.",o:["2","15/2","6","5","4/9"],c:1},
+{id:315,q:"\\(f(x)=\\dfrac{2x}{9}\\), \\(x\\in[0;3]\\); \\(f(x)=0\\), \\(x\\notin[0;3]\\). \\(M\\left(\\dfrac{1}{2}MX-2M^2X\\right)\\)-i tapın.",o:["2","0","-7","-2","1/2"],c:2},
+{id:316,q:"\\(f(x)=\\dfrac{2x}{9}\\), \\(x\\in[0;3]\\); \\(f(x)=0\\), \\(x\\notin[0;3]\\). \\(M(3M^3X-24)\\)-i tapın.",o:["0","1","2","24","20"],c:0},
+{id:317,q:"\\(f(x)=\\dfrac{x^2}{9}\\), \\(x\\in[0;3]\\); \\(f(x)=0\\), \\(x\\notin[0;3]\\). \\(M\\left(\\dfrac{4}{9}MX-1\\right)\\)-i tapın.",o:["0,1","-1","0","2","0,5"],c:2},
+{id:318,q:"\\(f(x)=\\dfrac{x^2}{9}\\), \\(x\\in[0;3]\\); \\(f(x)=0\\), \\(x\\notin[0;3]\\). \\(M\\left(\\dfrac{4}{9}MX+1\\right)\\)-i tapın.",o:["1/2","2","3","2/3","4/9"],c:1},
+{id:319,q:"\\(f(x)=\\dfrac{x^2}{9}\\), \\(x\\in[0;3]\\); \\(f(x)=0\\), \\(x\\notin[0;3]\\). \\(M(4X+3)\\)-i tapın.",o:["10","9","3","12","11"],c:3},
+{id:320,q:"\\(f(x)=7x^6\\), \\(x\\in[0;1]\\); \\(f(x)=0\\), \\(x\\notin[0;1]\\). \\(M(64M^2X-49)\\)-i tapın.",o:["1/8","0","7/8","8/7","1/7"],c:1},
+{id:321,q:"\\(f(x)=6x^5\\), \\(x\\in[0;1]\\); \\(f(x)=0\\), \\(x\\notin[0;1]\\). \\(M(7MX+3)\\)-i tapın.",o:["7","9","7/6","6/7","6"],c:1},
+{id:322,q:"\\(f(x)=5x^4\\), \\(x\\in[0;1]\\); \\(f(x)=0\\), \\(x\\notin[0;1]\\). \\(M(36M^2X+6MX)\\) riyazi gözləməsini tapın.",o:["1/6","6/5","5/6","25/36","30"],c:4},
+{id:323,q:"\\(f(x)=4x^3\\), \\(x\\in[0;1]\\); \\(f(x)=0\\), \\(x\\notin[0;1]\\). \\(M(5MX+1)\\)-i tapın.",o:["1/4","5","1","4/5","4"],c:1},
+{id:324,q:"\\(f(x)=3x^2\\), \\(x\\in[0;1]\\); \\(f(x)=0\\), \\(x\\notin[0;1]\\). \\(M(2X+1)\\)-i tapın.",o:["1","5/2","1/2","1/5","2"],c:1},
+{id:325,q:"\\(f(x)=2x\\), \\(x\\in[0;1]\\); \\(f(x)=0\\), \\(x\\notin[0;1]\\). MX-i tapın.",o:["2/3","Düzgün cavab yoxdur","2","3/2","1/3"],c:0},
+{id:326,q:"Paylanma funksiyasının xassəsi deyil.",o:["\\(\\lim_{x\\to-\\infty}F(x)=0\\) və \\(\\lim_{x\\to+\\infty}F(x)=1\\)","azalmayan funksiyadır","Düzgün cavab yoxdur","azalan funksiyadır","\\(0\\le F(x)\\le1\\)"],c:3},
+{id:328,q:"Kəsilməz X (0;1) intervalında \\(f(x)=3x^2\\) sıxlıq funksiyası ilə verilmişdir; bu interval xaricində f(x)=0. Dispersiyasını tapın.",o:["3/80","2","4/3","2/3","Düzgün cavab yoxdur"],c:0},
+{id:331,q:"Kəsilməz X (0;20) intervalında \\(f(x)=\\dfrac{1}{200}x\\) sıxlıq funksiyası ilə verilmişdir; bu interval xaricində f(x)=0. Riyazi gözləməsini tapın.",o:["40/3","20","Düzgün cavab yoxdur","20/3","40/9"],c:0},
+{id:334,q:"Hansılar üstlü paylanmaya aiddir? 1.\\(f(x)=\\lambda e^{-\\lambda x}\\),\\(x\\ge0\\) 2.\\(f(x)=\\dfrac{1}{b-a}\\),\\(a\\le x\\le b\\) 3.\\(D(X)=\\dfrac{1}{\\lambda^2}\\) 4.\\(D(X)=\\dfrac{(b-a)^2}{12}\\) 5.\\(P(\\alpha\\le x\\le\\beta)=\\dfrac{\\beta-\\alpha}{b-a}\\)",o:["2,4","2,4,5","1,3","1,3,5","Düzgün cavab yoxdur"],c:2},
+{id:335,q:"Hansılar müntəzəm paylanmaya aiddir? 1.\\(f(x)=\\lambda e^{-\\lambda x}\\),\\(x\\ge0\\) 2.\\(f(x)=\\dfrac{1}{b-a}\\),\\(a\\le x\\le b\\) 3.\\(D(X)=\\dfrac{1}{\\lambda^2}\\) 4.\\(D(X)=\\dfrac{(b-a)^2}{12}\\) 5.\\(P(\\alpha\\le x\\le\\beta)=\\dfrac{\\beta-\\alpha}{b-a}\\)",o:["1,3,5","Düzgün cavab yoxdur","2,4","2,4,5","1,3"],c:3},
+{id:336,q:"Kəsilməz X: \\(F(x)=0\\) (\\(x\\le0\\)), \\(F(x)=\\dfrac{x}{2}\\) (\\(0<x\\le2\\)), \\(F(x)=1\\) (\\(x>2\\)). Kəmiyyətin (1,05; 1,25) intervalında qiymət alması ehtimalını tapın.",o:["0,15","0,1","Düzgün cavab yoxdur","0,2","0,5"],c:1},
+{id:337,q:"[2;6] parçasında müntəzəm paylanmış kəmiyyət üçün hansılar doğrudur? 1.\\(f(x)=\\dfrac{1}{4}\\), \\(2\\le x\\le6\\) 2.[2;5] parçasına düşmə ehtimalı \\(p=\\dfrac{3}{4}\\) 3.[2;4] parçasına düşmə ehtimalı \\(p=\\dfrac{1}{4}\\) 4.\\(F(x)=\\dfrac{x-2}{4}\\), \\(2\\le x\\le6\\)",o:["Düzgün cavab yoxdur","1,2,3","1,2,4","2,3,4","1,3,4"],c:2},
+{id:338,q:"X kəsilməz kəmiyyəti (0,2) intervalında \\(f(x)=\\dfrac{1}{2}x\\) sıxlıq funksiyası ilə verilmişdir; bu interval xaricində f(x)=0. X-in dispersiyasını tapın.",o:["4/3","Düzgün cavab yoxdur","2","2/3","2/9"],c:4}
+,{id:172,q:"X təsadüfi kəmiyyətinin paylanma qanunu:<table class=\"tbl\"><tr><th>x</th><th>1</th><th>2</th><th>3</th><th>4</th></tr><tr><td>p</td><td>0,2</td><td>0,1</td><td>0,3</td><td>0,4</td></tr></table>\\(1\\le x\\le 4\\) olduqda \\(F(x)\\) paylanma funksiyasının aldığı qiyməti tapın.",o:["0,1","Düzgün cavab yoxdur","0,2","0,6","0,3"],c:3}
+,{id:173,q:"X paylanma qanunu:<table class=\"tbl\"><tr><th>x</th><th>1</th><th>2</th><th>3</th><th>4</th></tr><tr><td>p</td><td>0,2</td><td>0,3</td><td>0,1</td><td>0,4</td></tr></table>\\(x<1\\) olduqda \\(F(x)\\) paylanma funksiyasının aldığı qiyməti tapın.",o:["0","Düzgün cavab yoxdur","0,1","0,2","0,3"],c:0}
+,{id:174,q:"X paylanma qanunu:<table class=\"tbl\"><tr><th>x</th><th>2</th><th>4</th><th>5</th></tr><tr><td>p</td><td>0,5</td><td>0,2</td><td>0,3</td></tr></table>\\(4\\le x<5\\) olduqda paylanma funksiyasının aldığı qiyməti tapın.",o:["0,5","Düzgün cavab yoxdur","0,2","0,7","0,1"],c:3}
+,{id:175,q:"X paylanma qanunu:<table class=\"tbl\"><tr><th>x</th><th>10</th><th>20</th><th>30</th><th>40</th><th>50</th></tr><tr><td>p</td><td>0,2</td><td>0,3</td><td>0,35</td><td>0,1</td><td>0,05</td></tr></table>\\(30<x\\le 40\\) olduqda \\(F(x)\\)-in aldığı qiyməti tapın.",o:["Düzgün cavab yoxdur","0,3","0,1","0,35","0,85"],c:4}
+,{id:176,q:"Asılı olmayan X və Y diskret təsadüfi kəmiyyətlərinin paylanma qanunları:<table class=\"tbl\"><tr><th>X</th><th>−1</th><th>0</th><th>1</th></tr><tr><td>p</td><td>0,3</td><td>0,5</td><td>0,2</td></tr></table><table class=\"tbl\"><tr><th>Y</th><th>0</th><th>1</th><th>3</th></tr><tr><td>p</td><td>0,6</td><td>0,1</td><td>0,3</td></tr></table>\\(M(2XY)\\) riyazi gözləməsini tapın.",o:["Düzgün cavab yoxdur","0,5","0,6","−0,2","1"],c:3}
+,{id:219,q:"X təsadüfi kəmiyyətinin paylanması:<table class=\"tbl\"><tr><th>\\(x_i\\)</th><th>1</th><th>4</th><th>6</th><th>8</th></tr><tr><td>\\(p_i\\)</td><td>0,1</td><td>0,5</td><td>0,2</td><td>0,2</td></tr></table>Onun \\(0\\le x<4\\) aralığına düşmə ehtimalını hesablayın.",o:["0,5","0,6","0,7","0,1","Düzgün cavab yoxdur"],c:3}
+,{id:222,q:"X təsadüfi kəmiyyətinin paylanması:<table class=\"tbl\"><tr><th>\\(x_i\\)</th><th>1</th><th>4</th><th>6</th><th>8</th></tr><tr><td>\\(p_i\\)</td><td>0,05</td><td>0,55</td><td>0,12</td><td>0,28</td></tr></table>Onun \\(0\\le x\\le5\\) aralığına düşmə ehtimalını hesablayın.",o:["Düzgün cavab yoxdur","0,8","0,6","0,5","0,7"],c:2}
+,{id:241,q:"Diskret X və Y kəmiyyətlərinin paylanma qanunları:<table class=\"tbl\"><tr><th>X</th><th>1</th><th>2</th></tr><tr><td>p</td><td>0,3</td><td>0,7</td></tr></table><table class=\"tbl\"><tr><th>Y</th><th>3</th><th>4</th></tr><tr><td>p</td><td>0,4</td><td>0,6</td></tr></table>\\(M(X^2+Y^2)\\) riyazi gözləməsini tapın.",o:["16,3","Düzgün cavab yoxdur","3,1","3,6","9,6"],c:0}
+,{id:258,q:"X paylanma qanunu:<table class=\"tbl\"><tr><th>\\(x_i\\)</th><th>-10</th><th>0</th><th>20</th></tr><tr><td>\\(p_i\\)</td><td>0,2</td><td>0,5</td><td>0,3</td></tr></table>İkinci tərtib mərkəzi momentini tapın.",o:["124","140","24","4","Düzgün cavab yoxdur"],c:0}
+,{id:276,q:"X paylanma qanunu:<table class=\"tbl\"><tr><th>\\(x_i\\)</th><th>10</th><th>20</th><th>40</th><th>60</th></tr><tr><td>\\(p_i\\)</td><td>0,2</td><td>0,4</td><td>0,3</td><td>0,1</td></tr></table>İkinci tərtib mərkəzi momentini tapın.",o:["Düzgün cavab yoxdur","28","970","1020","236"],c:4}
+
+];
+
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+let questions = [], current = 0, answers = [], timerSec = 30*60, timerInterval, advanceTimer = null;
+const LETTERS = ['A','B','C','D','E'];
+
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+function startQuiz(){
+  if(advanceTimer){ clearTimeout(advanceTimer); advanceTimer = null; }
+  // Pick 30 random questions and shuffle their options
+  questions = shuffle(BANK).slice(0, 30).map(q => {
+    // Create shuffled option indices
+    const idxs = shuffle([0,1,2,3,4].slice(0, q.o.length));
+    const shuffledOpts = idxs.map(i => q.o[i]);
+    const newC = idxs.indexOf(q.c); // new position of correct answer
+    return { ...q, o: shuffledOpts, c: newC, _orig: q };
+  });
+  answers = new Array(30).fill(null);
+  current = 0;
+  timerSec = 30*60;
+  document.getElementById('splash').style.display = 'none';
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('quiz').style.display = 'block';
+  renderQ();
+  buildDots();
+  startTimer();
+}
+
+function renderQ(){
+  const q = questions[current];
+  document.getElementById('q-num').textContent = `Sual ${current+1} / 30`;
+  document.getElementById('q-counter').textContent = `Sual ${current+1} / 30`;
+
+  const answered = answers.filter(a=>a!==null).length;
+  document.getElementById('answered-count').textContent = `${answered} cavablandı`;
+  document.getElementById('progress-fill').style.width = `${((current+1)/30)*100}%`;
+
+  // question text
+  const qEl = document.getElementById('q-text');
+  qEl.innerHTML = q.q;
+  qEl.className = 'q-text fade-up';
+  void qEl.offsetWidth; // reflow
+
+  // options
+  const optsEl = document.getElementById('options');
+  optsEl.innerHTML = '';
+  optsEl.className = 'options fade-up';
+  void optsEl.offsetWidth;
+
+  q.o.forEach((opt, i)=>{
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.id = `opt-${i}`;
+    btn.innerHTML = `<span class="opt-letter">${LETTERS[i]}</span><span class="opt-text">${opt}</span><span class="feedback-icon"></span>`;
+
+    const userAns = answers[current];
+    if(userAns !== null){
+      btn.disabled = true;
+      if(i === q.c){
+        btn.classList.add('correct');
+        btn.querySelector('.feedback-icon').textContent = '✓';
+      } else if(i === userAns){
+        btn.classList.add('wrong');
+        btn.querySelector('.feedback-icon').textContent = '✗';
+      } else {
+        btn.style.opacity = '.45';
+      }
+    } else {
+      btn.onclick = ()=> selectAnswer(i);
+    }
+    optsEl.appendChild(btn);
+  });
+
+  document.getElementById('btn-prev').disabled = (current === 0);
+  document.getElementById('btn-next').disabled = (current === 29);
+
+  updateDots();
+
+  // MathJax
+  if(window.MathJax && MathJax.typesetPromise){
+    MathJax.typesetPromise([qEl, optsEl]).catch(()=>{});
+  }
+}
+
+function selectAnswer(idx){
+  if(answers[current] !== null) return;
+  answers[current] = idx;
+  const q = questions[current];
+
+  // disable all
+  document.querySelectorAll('.option-btn').forEach((btn, i)=>{
+    btn.disabled = true;
+    if(i === q.c){
+      btn.classList.add('correct');
+      btn.querySelector('.feedback-icon').textContent = '✓';
+    } else if(i === idx && idx !== q.c){
+      btn.classList.add('wrong');
+      btn.querySelector('.feedback-icon').textContent = '✗';
+    } else {
+      btn.style.opacity = '.45';
+    }
+  });
+
+  updateDots();
+  const answered = answers.filter(a=>a!==null).length;
+  document.getElementById('answered-count').textContent = `${answered} cavablandı`;
+
+  // auto-advance after 0.8s
+  if(current < 29){
+    advanceTimer = setTimeout(()=>{ advanceTimer = null; navigate(1); }, 800);
+  }
+}
+
+function navigate(dir){
+  if(advanceTimer){ clearTimeout(advanceTimer); advanceTimer = null; }
+  current += dir;
+  current = Math.max(0, Math.min(29, current));
+  renderQ();
+}
+
+function buildDots(){
+  const map = document.getElementById('dot-map');
+  map.innerHTML = '';
+  for(let i=0;i<30;i++){
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.id = `dot-${i}`;
+    d.textContent = i+1;
+    d.onclick = ()=>{ if(advanceTimer){ clearTimeout(advanceTimer); advanceTimer = null; } current=i; renderQ(); };
+    map.appendChild(d);
+  }
+}
+
+function updateDots(){
+  for(let i=0;i<30;i++){
+    const d = document.getElementById(`dot-${i}`);
+    if(!d) continue;
+    d.className = 'dot';
+    if(i===current) d.classList.add('active');
+    if(answers[i]!==null){
+      d.classList.add(answers[i]===questions[i].c ? 'answered-c' : 'answered-w');
+    }
+  }
+}
+
+// Timer
+function startTimer(){
+  clearInterval(timerInterval);
+  timerInterval = setInterval(()=>{
+    timerSec--;
+    const m=Math.floor(timerSec/60), s=timerSec%60;
+    document.getElementById('timer-display').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    const box = document.getElementById('timer-box');
+    box.className = 'timer-box';
+    if(timerSec<=300) box.classList.add('warning');
+    if(timerSec<=60) box.classList.add('danger');
+    if(timerSec<=0){ clearInterval(timerInterval); finishQuiz(); }
+  }, 1000);
+}
+
+function finishQuiz(){
+  clearInterval(timerInterval);
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('results').style.display = 'block';
+  showResults();
+}
+
+function showResults(){
+  let correct=0, wrong=0, skip=0;
+  questions.forEach((q,i)=>{
+    if(answers[i]===null) skip++;
+    else if(answers[i]===q.c) correct++;
+    else wrong++;
+  });
+  const pct = Math.round((correct/30)*100);
+
+  // ring
+  const r=50, circ=2*Math.PI*r;
+  const ring = document.getElementById('ring-fg');
+  ring.setAttribute('stroke-dasharray', circ);
+  ring.setAttribute('stroke-dashoffset', circ);
+  const color = pct>=70 ? '#22c55e' : pct>=40 ? '#c9a227' : '#ef4444';
+  ring.style.stroke = color;
+  setTimeout(()=>{ ring.style.strokeDashoffset = circ - (pct/100)*circ; },100);
+
+  document.getElementById('pct-num').textContent = pct+'%';
+  document.getElementById('pct-num').style.color = color;
+  document.getElementById('r-correct').textContent = correct;
+  document.getElementById('r-wrong').textContent = wrong;
+  document.getElementById('r-skip').textContent = skip;
+
+  const titles = ['Əla! 🎉','Yaxşı! 👍','Orta 📚','Daha çox çalış! 💪'];
+  const subs = [`${correct}/30 düzgün cavab — Mükəmməl nəticə!`,`${correct}/30 düzgün cavab — Davam et!`,`${correct}/30 düzgün cavab — Mövzuları təkrar et.`,`${correct}/30 düzgün cavab — Daha çox məşq lazımdır.`];
+  const ti = pct>=85?0:pct>=65?1:pct>=40?2:3;
+  document.getElementById('result-title').textContent = titles[ti];
+  document.getElementById('result-sub').textContent = subs[ti];
+
+  // Review
+  const list = document.getElementById('review-list');
+  list.innerHTML = '';
+  questions.forEach((q,i)=>{
+    const isC = answers[i]===q.c;
+    const isSkip = answers[i]===null;
+    const div = document.createElement('div');
+    div.className = `review-item ${isSkip?'':isC?'rc':'rw'}`;
+    const icon = isSkip?'—':isC?'✓':'✗';
+    let optsHtml = '';
+    q.o.forEach((opt,j)=>{
+      let cls='neutral';
+      if(j===q.c) cls='rc';
+      else if(j===answers[i] && answers[i]!==null && j!==q.c) cls='rw';
+      optsHtml+=`<div class="rev-opt ${cls}"><span class="lbl">${LETTERS[j]}</span><span>${opt}</span></div>`;
+    });
+    div.innerHTML = `
+      <div class="review-header">
+        <div class="review-badge">${icon}</div>
+        <div class="review-q"><strong>S${q.id}:</strong> ${q.q}</div>
+      </div>
+      <div class="review-answers">${optsHtml}</div>`;
+    list.appendChild(div);
+  });
+
+  window.scrollTo(0,0);
+  if(window.MathJax && MathJax.typesetPromise){
+    MathJax.typesetPromise([list]).catch(()=>{});
+  }
+}
+
+function retryQuiz(){
+  clearInterval(timerInterval);
+  if(advanceTimer){ clearTimeout(advanceTimer); advanceTimer = null; }
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('splash').style.display = 'none';
+  questions = shuffle(BANK).slice(0, 30).map(function(q) {
+    var idxs = shuffle([0,1,2,3,4].slice(0, q.o.length));
+    var shuffledOpts = idxs.map(function(i){ return q.o[i]; });
+    var newC = idxs.indexOf(q.c);
+    return Object.assign({}, q, { o: shuffledOpts, c: newC });
+  });
+  answers = new Array(30).fill(null);
+  current = 0;
+  timerSec = 30*60;
+  document.getElementById('quiz').style.display = 'block';
+  renderQ();
+  buildDots();
+  startTimer();
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
